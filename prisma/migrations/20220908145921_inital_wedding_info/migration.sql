@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Wedding" ADD COLUMN     "plannedNumberOfGuests" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "plannedTotalCost" DOUBLE PRECISION NOT NULL DEFAULT 0;

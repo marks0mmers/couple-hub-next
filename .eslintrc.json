@@ -1,3 +1,10 @@
 {
-  "extends": "next/core-web-vitals"
+  "extends": ["eslint:recommended", "next/core-web-vitals"],
+  "rules": {
+    "indent": ["warn", 2],
+    "object-curly-spacing": ["warn", "always"],
+    "semi": ["error", "always"],
+    "comma-dangle": ["warn", "always-multiline"],
+    "quotes": ["warn", "double"]
+  }
 }
