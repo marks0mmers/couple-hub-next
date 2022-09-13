@@ -1,6 +1,5 @@
 import { User, Wedding } from "@prisma/client";
 import { GetServerSideProps } from "next";
-import { getSession } from "next-auth/react";
 import { prisma } from "../../common/prisma";
 import format from "date-fns/format";
 import { NextPageWithLayout } from "../_app";
@@ -9,17 +8,15 @@ import WeddingLayout from "../../components/WeddingLayout";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import axios from "axios";
 import debounce from "lodash.debounce";
+import { goToSignIn } from "../../util/auth-utils";
+import { unstable_getServerSession } from "next-auth";
+import { authOptions } from "../api/auth/[...nextauth]";
 
-export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
-  const session = await getSession(context);
+export const getServerSideProps: GetServerSideProps<Props> = async ({ req, res }) => {
+  const session = await unstable_getServerSession(req, res, authOptions);
 
   if (!session) {
-    return {
-      redirect: {
-        destination: "/api/auth/signIn",
-        permanent: false,
-      },
-    };
+    return goToSignIn();
   }
 
   const couple = await prisma.couple.findFirst({
@@ -84,9 +81,10 @@ type Props = {
   }
 };
 
-const WeddingPage: NextPageWithLayout<Props> = ({ coupleId, wedding: weddingProp }: Props) => {
+const WeddingPage: NextPageWithLayout<Props> = ({ coupleId, wedding: weddingProp }) => {
   const [wedding, setWedding] = useState(weddingProp);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateWeddingState = useCallback((wedding: any) => {
     setWedding(prev => ({
       ...prev,

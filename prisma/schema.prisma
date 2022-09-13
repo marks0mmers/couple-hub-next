@@ -66,7 +66,7 @@ enum CoupleType {
 
 model Couple {
   id                String      @id @default(cuid())
-  relationshipStart DateTime?
+  relationshipStart DateTime?   @db.Date
   coupleType        CoupleType  @default(DATING)
 
   users             User[]
@@ -74,10 +74,32 @@ model Couple {
 }
 
 model Wedding {
-  id                      String    @id @default(cuid())
-  coupleId                String    @unique
-  couple                  Couple    @relation(fields: [coupleId], references: [id])
-  weddingDate             DateTime?
-  plannedNumberOfGuests   Int       @default(0)
-  plannedTotalCost        Float     @default(0)
+  id                      String          @id @default(cuid())
+  coupleId                String          @unique
+  couple                  Couple          @relation(fields: [coupleId], references: [id])
+  weddingDate             DateTime?       @db.Date
+  plannedNumberOfGuests   Int             @default(0)
+  plannedTotalCost        Float           @default(0)
+  venues                  WeddingVenue[]
+}
+
+enum WeddingVenuePriceType {
+  FLAT_FEE
+  PER_HOUR
+}
+
+model WeddingVenue {
+  id          String    @id @default(cuid())
+  weddingId   String
+  wedding     Wedding   @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  name        String
+  capacity    Int
+  price       Float
+  priceType   WeddingVenuePriceType
+  rentalStart DateTime? @db.Time(2)
+  rentalEnd   DateTime? @db.Time(2)
+  street      String
+  city        String
+  state       String
+  zipCode     Int
 }

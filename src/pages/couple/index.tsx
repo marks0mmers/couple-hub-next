@@ -1,6 +1,6 @@
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { User } from "@prisma/client";
-import { getSession, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { Couple, CoupleType } from "@prisma/client";
 import { prisma } from "../../common/prisma";
 import { ChangeEvent, useCallback, useMemo } from "react";
@@ -8,6 +8,9 @@ import axios from "axios";
 import format from "date-fns/format";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import { goToSignIn } from "../../util/auth-utils";
+import { unstable_getServerSession } from "next-auth";
+import { authOptions } from "../api/auth/[...nextauth]";
 
 type Props = {
   couple?: Omit<Couple, "relationshipStart"> & {
@@ -16,16 +19,11 @@ type Props = {
   };
 }
 
-export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
-  const session = await getSession(context);
+export const getServerSideProps: GetServerSideProps<Props> = async ({ req, res }) => {
+  const session = await unstable_getServerSession(req, res, authOptions);
 
   if (!session) {
-    return {
-      redirect: {
-        destination: "/api/auth/signIn",
-        permanent: false,
-      },
-    };
+    return goToSignIn();
   }
 
   const couple = await prisma.couple.findFirst({
@@ -48,8 +46,6 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
       },
     };
   }
-
-  console.log(couple.relationshipStart);
 
   return {
     props: {
@@ -91,8 +87,6 @@ const CouplePage = ({ couple }: InferGetServerSidePropsType<typeof getServerSide
   const otherUser = useMemo(() => {
     return couple?.users.find(user => user.email !== session?.user?.email);
   }, [couple?.users, session?.user?.email]);
-
-  console.log(couple?.relationshipStart);
 
   return (
     <main id="couple-page" className="flex-1 p-4 bg-base-200">

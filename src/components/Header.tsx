@@ -1,8 +1,11 @@
 import { Bars3BottomLeftIcon } from "@heroicons/react/20/solid";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
+import { useTheme } from "../pages/_app";
 
 const Header = () => {
+  const [, setTheme] = useTheme();
+
   const { data: session } = useSession();
 
   return (
@@ -16,7 +19,11 @@ const Header = () => {
         </article>
       </div>
       <div id="right" className="flex gap-4 pr-4">
-        <select data-choose-theme={true} className="select select-sm select-bordered">
+        <select
+          data-choose-theme={true}
+          className="select select-sm select-bordered"
+          onChange={e => setTheme(e.target.value)}
+        >
           <option value="light">Light</option>
           <option value="dark">Dark</option>
         </select>
@@ -35,7 +42,7 @@ const Header = () => {
               </div>
             </label>
             <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
-              <li onClick={() => signOut()}><a>Sign Out</a></li>
+              <li onClick={() => signOut()}><p>Sign Out</p></li>
             </ul>
           </div>
         ) : (

@@ -9,6 +9,21 @@ module.exports = {
   },
   plugins: [require("@tailwindcss/typography"), require("daisyui")],
   daisyui: {
-    themes: ["light", "dark"],
+    themes: [
+      {
+        light: {
+          ...require("daisyui/src/colors/themes")["[data-theme=light]"],
+          secondary: "#3399ff",
+          "secondary-focus": "#1a7bdb",
+        },
+      },
+      {
+        dark: {
+          ...require("daisyui/src/colors/themes")["[data-theme=dark]"],
+          secondary: "#3399ff",
+          "secondary-focus": "#1a7bdb",
+        },
+      },
+    ],
   },
 };
