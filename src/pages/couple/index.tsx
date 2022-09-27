@@ -61,6 +61,9 @@ async function updateCouple(body: unknown) {
   const options = {
     method: "PUT",
     body: JSON.stringify(body),
+    headers: {
+      "Content-Type": "application/json",
+    },
   };
 
   await fetch(url, options);

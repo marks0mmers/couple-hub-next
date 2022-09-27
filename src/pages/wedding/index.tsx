@@ -68,6 +68,9 @@ async function updateWedding(body: unknown): Promise<WeddingProp> {
   const options = {
     method: "PUT",
     body: JSON.stringify(body),
+    headers: {
+      "Content-Type": "application/json",
+    },
   };
 
   const res = await fetch(url, options);
@@ -93,6 +96,9 @@ export default function WeddingPage({ coupleId, wedding: weddingProp }: Props) {
       body: JSON.stringify({
         coupleId,
       }),
+      headers: {
+        "Content-Type": "application/json",
+      },
     };
 
     const res = await fetch(url, options);

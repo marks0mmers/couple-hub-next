@@ -93,6 +93,9 @@ export default function Guests({ wedding, tiers }: Props) {
         const options = {
           method: "PUT",
           body: JSON.stringify(reorderObject),
+          headers: {
+            "Content-Type": "application/json",
+          },
         };
 
         const res = await fetch(url, options);
@@ -113,6 +116,9 @@ export default function Guests({ wedding, tiers }: Props) {
         body: JSON.stringify({
           name: newGuestTierName,
         }),
+        headers: {
+          "Content-Type": "application/json",
+        },
       };
 
       const res = await fetch(url, options);

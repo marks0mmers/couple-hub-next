@@ -19,8 +19,11 @@ const GuestColumn = ({ tier, index, onGuestCreated }: Props) => {
 
       const url = `/api/weddings/guestTiers/guests?tierId=${tier.id}`;
 
-      const options = {
+      const options: RequestInit = {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           name: newGuestName,
         }),
