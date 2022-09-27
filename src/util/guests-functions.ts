@@ -1,6 +1,6 @@
 import { WeddingGuest, WeddingGuestTier } from "@prisma/client";
 
-export type WeddingGuestTierWithGuests = WeddingGuestTier & { weddingGuests: WeddingGuest[] }
+export type WeddingGuestTierWithGuests = WeddingGuestTier & { weddingGuests: WeddingGuest[] };
 
 type ReorderObject = {
   guestId: string;
@@ -8,21 +8,15 @@ type ReorderObject = {
   fromOrder: number;
   toTierId: string;
   toOrder: number;
-}
+};
 
 export const reorderGuests = (
   prevModel: WeddingGuestTierWithGuests[],
   movedGuest: WeddingGuest,
-  reorderObject: ReorderObject,
+  reorderObject: ReorderObject
 ): WeddingGuestTierWithGuests[] => {
-  const {
-    guestId,
-    fromTierId,
-    fromOrder,
-    toTierId,
-    toOrder,
-  } = reorderObject;
-  const fromTier = prevModel.find(tier => tier.id === fromTierId);
+  const { guestId, fromTierId, fromOrder, toTierId, toOrder } = reorderObject;
+  const fromTier = prevModel.find((tier) => tier.id === fromTierId);
   if (!fromTier) {
     return prevModel;
   }
@@ -31,19 +25,21 @@ export const reorderGuests = (
     if (fromOrder < toOrder) {
       // Moved down
       const newModel = [
-        ...prevModel.filter(tier => tier.id !== fromTierId),
+        ...prevModel.filter((tier) => tier.id !== fromTierId),
         {
           ...fromTier,
           weddingGuests: [
-            ...fromTier.weddingGuests.filter(guest =>
-              guest.id !== guestId && (guest.order <= fromOrder || guest.order > toOrder)
+            ...fromTier.weddingGuests.filter(
+              (guest) => guest.id !== guestId && (guest.order <= fromOrder || guest.order > toOrder)
             ),
-            ...fromTier.weddingGuests.filter(guest =>
-              guest.id !== guestId && guest.order > fromOrder && guest.order <= toOrder
-            ).map(guest => ({
-              ...guest,
-              order: guest.order - 1,
-            })),
+            ...fromTier.weddingGuests
+              .filter(
+                (guest) => guest.id !== guestId && guest.order > fromOrder && guest.order <= toOrder
+              )
+              .map((guest) => ({
+                ...guest,
+                order: guest.order - 1,
+              })),
             movedGuest,
           ].sort((a, b) => a.order - b.order),
         },
@@ -53,19 +49,21 @@ export const reorderGuests = (
     } else {
       // Moved up
       const newModel = [
-        ...prevModel.filter(tier => tier.id !== fromTierId),
+        ...prevModel.filter((tier) => tier.id !== fromTierId),
         {
           ...fromTier,
           weddingGuests: [
-            ...fromTier.weddingGuests.filter(guest =>
-              guest.id !== guestId && (guest.order < toOrder || guest.order >= fromOrder)
+            ...fromTier.weddingGuests.filter(
+              (guest) => guest.id !== guestId && (guest.order < toOrder || guest.order >= fromOrder)
             ),
-            ...fromTier.weddingGuests.filter(guest =>
-              guest.id !== guestId && guest.order >= toOrder && guest.order < fromOrder
-            ).map(guest => ({
-              ...guest,
-              order: guest.order + 1,
-            })),
+            ...fromTier.weddingGuests
+              .filter(
+                (guest) => guest.id !== guestId && guest.order >= toOrder && guest.order < fromOrder
+              )
+              .map((guest) => ({
+                ...guest,
+                order: guest.order + 1,
+              })),
             movedGuest,
           ].sort((a, b) => a.order - b.order),
         },
@@ -74,19 +72,21 @@ export const reorderGuests = (
       return newModel.sort((a, b) => a.order - b.order);
     }
   } else {
-    const toTier = prevModel.find(tier => tier.id === toTierId);
+    const toTier = prevModel.find((tier) => tier.id === toTierId);
     if (!toTier) {
       return prevModel;
     }
     const newModel = [
-      ...prevModel.filter(tier => tier.id !== fromTierId && tier.id !== toTierId),
+      ...prevModel.filter((tier) => tier.id !== fromTierId && tier.id !== toTierId),
       {
         ...fromTier,
         weddingGuests: [
-          ...fromTier.weddingGuests.filter(guest => guest.id !== guestId && guest.order < fromOrder),
+          ...fromTier.weddingGuests.filter(
+            (guest) => guest.id !== guestId && guest.order < fromOrder
+          ),
           ...fromTier.weddingGuests
-            .filter(guest => guest.id !== guestId && guest.order >= fromOrder)
-            .map(guest => ({
+            .filter((guest) => guest.id !== guestId && guest.order >= fromOrder)
+            .map((guest) => ({
               ...guest,
               order: guest.order - 1,
             })),
@@ -95,10 +95,10 @@ export const reorderGuests = (
       {
         ...toTier,
         weddingGuests: [
-          ...toTier.weddingGuests.filter(guest => guest.id !== guestId && guest.order < toOrder),
+          ...toTier.weddingGuests.filter((guest) => guest.id !== guestId && guest.order < toOrder),
           ...toTier.weddingGuests
-            .filter(guest => guest.id !== guestId && guest.order >= toOrder)
-            .map(guest => ({
+            .filter((guest) => guest.id !== guestId && guest.order >= toOrder)
+            .map((guest) => ({
               ...guest,
               order: guest.order + 1,
             })),

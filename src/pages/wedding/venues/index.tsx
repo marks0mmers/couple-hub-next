@@ -13,10 +13,9 @@ import Link from "next/link";
 import { getCoupleId } from "../../../common/get-couple-id";
 import { dateToString } from "../../../util/date-utils";
 
-const ResponsiveBar = dynamic(
-  () => import("../../../util/charts/responsive-bar"),
-  { suspense: true }
-);
+const ResponsiveBar = dynamic(() => import("../../../util/charts/responsive-bar"), {
+  suspense: true,
+});
 
 export const getServerSideProps: GetServerSideProps<Props> = async ({ req, res }) => {
   const { coupleId, redirect } = await getCoupleId(req, res);
@@ -54,7 +53,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ req, res }
         id: wedding.id,
         plannedNumberOfGuests: wedding.plannedNumberOfGuests,
       },
-      venues: wedding.venues.map(venue => ({
+      venues: wedding.venues.map((venue) => ({
         ...venue,
         rentalStart: dateToString(venue.rentalStart),
         rentalEnd: dateToString(venue.rentalEnd),
@@ -67,12 +66,14 @@ type Props = {
   wedding: {
     id: string;
     plannedNumberOfGuests: number;
-  }
-  venues: Array<Omit<WeddingVenue, "rentalStart" | "rentalEnd"> & {
-    rentalStart: string | null;
-    rentalEnd: string | null;
-  }>;
-}
+  };
+  venues: Array<
+    Omit<WeddingVenue, "rentalStart" | "rentalEnd"> & {
+      rentalStart: string | null;
+      rentalEnd: string | null;
+    }
+  >;
+};
 
 export default function Venues({ wedding, venues }: Props) {
   const [themeString] = useTheme();
@@ -83,7 +84,7 @@ export default function Venues({ wedding, venues }: Props) {
       if (root) {
         const styles = getComputedStyle(root);
         const theme = new Map<string, string>();
-        ["--a", "--bc", "--su", "--er"].map(cssVar => {
+        ["--a", "--bc", "--su", "--er"].map((cssVar) => {
           theme.set(cssVar, `hsl(${styles.getPropertyValue(cssVar)})`);
         });
         return theme;
@@ -93,41 +94,54 @@ export default function Venues({ wedding, venues }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [themeString]);
 
-  const barChartTheme: Theme = useMemo(() => ({
-    axis: {
-      ticks: {
-        text: {
-          fill: theme.get("--bc"),
+  const barChartTheme: Theme = useMemo(
+    () => ({
+      axis: {
+        ticks: {
+          text: {
+            fill: theme.get("--bc"),
+          },
         },
       },
-    },
-  }), [theme]);
+    }),
+    [theme]
+  );
 
   const getTotalPrice = useCallback(
-    (
-      { price, rentalStart, rentalEnd }: { price: number, rentalStart: string | null, rentalEnd: string | null },
-    ) =>
-      (price / 60 / 60) * differenceInSeconds(
+    ({
+      price,
+      rentalStart,
+      rentalEnd,
+    }: {
+      price: number;
+      rentalStart: string | null;
+      rentalEnd: string | null;
+    }) =>
+      (price / 60 / 60) *
+      differenceInSeconds(
         parse(rentalEnd ?? "", "h:mm a", new Date()),
-        parse(rentalStart ?? "", "h:mm a", new Date()),
+        parse(rentalStart ?? "", "h:mm a", new Date())
       ),
-    [],
+    []
   );
 
   const priceChartData = useMemo(() => {
-    return venues.map(venue => ({
+    return venues.map((venue) => ({
       label: venue.name,
-      price: venue.priceType === WeddingVenuePriceType.PER_HOUR ? getTotalPrice(venue) : venue.price,
+      price:
+        venue.priceType === WeddingVenuePriceType.PER_HOUR ? getTotalPrice(venue) : venue.price,
       color: theme.get("--a") ?? "",
     }));
   }, [venues, getTotalPrice, theme]);
 
   const capacityChartData = useMemo(() => {
-    return venues.map(venue => ({
+    return venues.map((venue) => ({
       label: venue.name,
       capacity: venue.capacity,
       plannedCapacity: wedding.plannedNumberOfGuests,
-      color: (venue.capacity < wedding.plannedNumberOfGuests ? theme.get("--er") : theme.get("--su")) ?? "",
+      color:
+        (venue.capacity < wedding.plannedNumberOfGuests ? theme.get("--er") : theme.get("--su")) ??
+        "",
     }));
   }, [venues, wedding, theme]);
 
@@ -139,7 +153,7 @@ export default function Venues({ wedding, venues }: Props) {
         </article>
         <Link href="/wedding/venues/create">
           <button className="btn btn-secondary gap-2">
-            <PlusIcon className="w-6 h-6"/>
+            <PlusIcon className="w-6 h-6" />
             Add Venue
           </button>
         </Link>
@@ -159,22 +173,22 @@ export default function Venues({ wedding, venues }: Props) {
             </tr>
           </thead>
           <tbody>
-            {venues.map(venue => (
+            {venues.map((venue) => (
               <tr key={venue.id}>
                 <td>{venue.name}</td>
                 <td>{venue.capacity}</td>
-                <td>{
-                  venue.priceType === WeddingVenuePriceType.PER_HOUR
+                <td>
+                  {venue.priceType === WeddingVenuePriceType.PER_HOUR
                     ? `$${venue.price.toFixed(2)}/hr`
-                    : `$${venue.price.toFixed(2)}`
-                }</td>
+                    : `$${venue.price.toFixed(2)}`}
+                </td>
                 <td>{venue.rentalStart ?? ""}</td>
                 <td>{venue.rentalEnd ?? ""}</td>
-                <td>{
-                  venue.priceType === WeddingVenuePriceType.PER_HOUR
+                <td>
+                  {venue.priceType === WeddingVenuePriceType.PER_HOUR
                     ? `$${getTotalPrice(venue).toFixed(2)}`
-                    : `$${venue.price.toFixed(2)}`
-                }</td>
+                    : `$${venue.price.toFixed(2)}`}
+                </td>
                 <td>{`${venue.street}, ${venue.city}, ${venue.state} ${venue.zipCode}`}</td>
               </tr>
             ))}
@@ -217,10 +231,8 @@ export default function Venues({ wedding, venues }: Props) {
             ]}
           />
         </Suspense>
-
       </div>
     </div>
-
   );
 }
 

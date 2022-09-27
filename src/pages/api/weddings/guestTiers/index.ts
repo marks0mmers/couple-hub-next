@@ -21,12 +21,12 @@ const handlePost: NextApiHandler = async (req, res) => {
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   switch (req.method) {
-  case "POST":
-    await handlePost(req, res);
-    return;
-  default:
-    res.status(405).send("Method not supported");
-    return;
+    case "POST":
+      await handlePost(req, res);
+      return;
+    default:
+      res.status(405).send("Method not supported");
+      return;
   }
 }
 

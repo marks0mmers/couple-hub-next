@@ -17,7 +17,7 @@ import { NextPage } from "next";
 import Head from "next/head";
 import { ToastContainer } from "react-toastify";
 
-const ThemeContext = createContext<[string, Dispatch<SetStateAction<string>>]>(["light", x => x]);
+const ThemeContext = createContext<[string, Dispatch<SetStateAction<string>>]>(["light", (x) => x]);
 
 export const useTheme = () => {
   return useContext(ThemeContext);
@@ -25,12 +25,12 @@ export const useTheme = () => {
 
 export type NextPageWithLayout<P = unknown, IP = P> = NextPage<P, IP> & {
   // eslint-disable-next-line no-unused-vars
-  getLayout?: (page: ReactElement) => ReactNode
-}
+  getLayout?: (page: ReactElement) => ReactNode;
+};
 
 type AppPropsWithLayout = AppProps & {
-  Component: NextPageWithLayout
-}
+  Component: NextPageWithLayout;
+};
 
 export default function MyApp({
   Component,
@@ -38,7 +38,7 @@ export default function MyApp({
 }: AppPropsWithLayout) {
   const [theme, setTheme] = useState("light");
 
-  const getLayout = Component.getLayout || (page => page);
+  const getLayout = Component.getLayout || ((page) => page);
 
   useEffect(() => {
     themeChange(false);
@@ -49,11 +49,12 @@ export default function MyApp({
       <ThemeContext.Provider value={[theme, setTheme]}>
         <Head>
           <title>Couple Planner</title>
-          <meta name="description" content="An application to help couples plan their lives together" />
+          <meta
+            name="description"
+            content="An application to help couples plan their lives together"
+          />
         </Head>
-        <Layout>
-          {getLayout(<Component {...pageProps} />)}
-        </Layout>
+        <Layout>{getLayout(<Component {...pageProps} />)}</Layout>
         <ToastContainer />
       </ThemeContext.Provider>
     </SessionProvider>

@@ -5,13 +5,15 @@ type Props = {
     dueDate: string | null;
   };
   onFormDoneClick: (isEditing: boolean) => void;
-}
+};
 
 export default function BudgetForm({ budget, onFormDoneClick }: Props) {
   return (
     <tr>
       <td>
-        {budget && <input name="id" className="hidden" form="upsert-form" defaultValue={budget.id} /> }
+        {budget && (
+          <input name="id" className="hidden" form="upsert-form" defaultValue={budget.id} />
+        )}
         <input
           className="input input-bordered input-sm w-full"
           name="name"
@@ -69,7 +71,12 @@ export default function BudgetForm({ budget, onFormDoneClick }: Props) {
         />
       </td>
       <td>
-        <button className="btn btn-sm" onClick={() => onFormDoneClick(!!budget)} type="submit" form="upsert-form">
+        <button
+          className="btn btn-sm"
+          onClick={() => onFormDoneClick(!!budget)}
+          type="submit"
+          form="upsert-form"
+        >
           Done
         </button>
       </td>

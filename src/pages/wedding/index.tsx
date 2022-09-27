@@ -5,7 +5,6 @@ import format from "date-fns/format";
 import { ChangeEvent, ReactElement, useCallback, useState } from "react";
 import WeddingLayout from "../../components/WeddingLayout";
 import { PlusIcon } from "@heroicons/react/24/solid";
-import axios from "axios";
 import debounce from "lodash/debounce";
 import { getCoupleId } from "../../common/get-couple-id";
 import { dateToString } from "../../util/date-utils";
@@ -54,20 +53,33 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ req, res }
   };
 };
 
+type WeddingProp = Omit<Wedding, "weddingDate"> & {
+  weddingDate: string | null;
+  users: User[];
+};
+
 type Props = {
   coupleId: string;
-  wedding?: Omit<Wedding, "weddingDate"> & {
-    weddingDate: string | null;
-    users: User[]
-  }
+  wedding?: WeddingProp;
 };
+
+async function updateWedding(body: unknown): Promise<WeddingProp> {
+  const url = "/api/weddings";
+  const options = {
+    method: "PUT",
+    body: JSON.stringify(body),
+  };
+
+  const res = await fetch(url, options);
+  return res.json();
+}
 
 export default function WeddingPage({ coupleId, wedding: weddingProp }: Props) {
   const [wedding, setWedding] = useState(weddingProp);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateWeddingState = useCallback((wedding: any) => {
-    setWedding(prev => ({
+    setWedding((prev) => ({
       ...prev,
       ...wedding,
       weddingDate: wedding.weddingDate ? format(new Date(wedding.weddingDate), "yyyy-MM-dd") : null,
@@ -75,38 +87,55 @@ export default function WeddingPage({ coupleId, wedding: weddingProp }: Props) {
   }, []);
 
   const onCreateClick = useCallback(async () => {
-    const { data: createdWedding } = await axios.post("/api/weddings", {
-      coupleId,
-    });
+    const url = "/api/weddings";
+    const options = {
+      method: "POST",
+      body: JSON.stringify({
+        coupleId,
+      }),
+    };
+
+    const res = await fetch(url, options);
+    const createdWedding: WeddingProp = await res.json();
+
     updateWeddingState(createdWedding);
   }, [coupleId, updateWeddingState]);
 
-  const onWeddingDateChange = useCallback(async (e: ChangeEvent<HTMLInputElement>) => {
-    const newDate = e.target.value;
-    const { data: updatedWedding } = await axios.put("/api/weddings", {
-      ...wedding,
-      weddingDate: newDate,
-    });
-    updateWeddingState(updatedWedding);
-  }, [wedding, updateWeddingState]);
+  const onWeddingDateChange = useCallback(
+    async (e: ChangeEvent<HTMLInputElement>) => {
+      const newDate = e.target.value;
+      const updatedWedding = await updateWedding({
+        ...wedding,
+        weddingDate: newDate,
+      });
+      updateWeddingState(updatedWedding);
+    },
+    [wedding, updateWeddingState]
+  );
 
-  const onNumberOfGuestsChanged = useCallback(async (e: ChangeEvent<HTMLInputElement>) => {
-    const newNumberOfGuests = +e.target.value;
-    const { data: updatedWedding } = await axios.put("/api/weddings", {
-      ...wedding,
-      plannedNumberOfGuests: newNumberOfGuests,
-    });
-    updateWeddingState(updatedWedding);
-  }, [wedding, updateWeddingState]);
+  const onNumberOfGuestsChanged = useCallback(
+    async (e: ChangeEvent<HTMLInputElement>) => {
+      const newNumberOfGuests = +e.target.value;
+      const updatedWedding = await updateWedding({
+        ...wedding,
+        plannedNumberOfGuests: newNumberOfGuests,
+      });
+      updateWeddingState(updatedWedding);
+    },
+    [wedding, updateWeddingState]
+  );
 
-  const onTotalCostChanged = useCallback(async (e: ChangeEvent<HTMLInputElement>) => {
-    const newTotalCost = +e.target.value;
-    const { data: updatedWedding } = await axios.put("/api/weddings", {
-      ...wedding,
-      plannedTotalCost: newTotalCost,
-    });
-    updateWeddingState(updatedWedding);
-  }, [wedding, updateWeddingState]);
+  const onTotalCostChanged = useCallback(
+    async (e: ChangeEvent<HTMLInputElement>) => {
+      const newTotalCost = +e.target.value;
+      const updatedWedding = await updateWedding({
+        ...wedding,
+        plannedTotalCost: newTotalCost,
+      });
+      updateWeddingState(updatedWedding);
+    },
+    [wedding, updateWeddingState]
+  );
 
   if (!wedding) {
     return (
@@ -115,7 +144,7 @@ export default function WeddingPage({ coupleId, wedding: weddingProp }: Props) {
           <h3 className="text-center">Click to start planning your wedding!</h3>
         </article>
         <button className="btn btn-secondary gap-2" onClick={onCreateClick}>
-          <PlusIcon className="h-6 w-6"/>
+          <PlusIcon className="h-6 w-6" />
           Create
         </button>
       </div>

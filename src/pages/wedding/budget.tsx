@@ -45,7 +45,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ req, res }
         id: wedding.id,
         plannedTotalCost: wedding.plannedTotalCost,
       },
-      budgetItems: wedding.budgetItems.map(item => ({
+      budgetItems: wedding.budgetItems.map((item) => ({
         ...item,
         dueDate: dateToString(item.dueDate),
       })),
@@ -60,18 +60,21 @@ type Props = {
   wedding: {
     id: string;
     plannedTotalCost: number;
-  }
-}
+  };
+};
 
 export default function Budget({ budgetItems, wedding }: Props) {
   const formRef = useRef<HTMLFormElement>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  const onEditClick = useCallback((id: string) => (e: MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    setEditingId(id);
-  }, []);
+  const onEditClick = useCallback(
+    (id: string) => (e: MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      setEditingId(id);
+    },
+    []
+  );
 
   const onFormDoneClick = useCallback((isEditing: boolean) => {
     if (isEditing) {
@@ -87,9 +90,7 @@ export default function Budget({ budgetItems, wedding }: Props) {
       return "-";
     }
     const difference = goalAmount - actualAmount;
-    return difference >= 0
-      ? `$${difference.toFixed(2)}`
-      : `$(${(difference * -1).toFixed(2)})`;
+    return difference >= 0 ? `$${difference.toFixed(2)}` : `$(${(difference * -1).toFixed(2)})`;
   }, []);
 
   return (
@@ -102,7 +103,9 @@ export default function Budget({ budgetItems, wedding }: Props) {
           </div>
           <div className="stat">
             <div className="stat-title">Planned Total</div>
-            <div className="stat-value">${budgetItems.reduce((acc, val) => acc + val.goalAmount, 0)}</div>
+            <div className="stat-value">
+              ${budgetItems.reduce((acc, val) => acc + val.goalAmount, 0)}
+            </div>
           </div>
           <div className="stat">
             <div className="stat-title">Planned Actual</div>
@@ -113,9 +116,9 @@ export default function Budget({ budgetItems, wedding }: Props) {
         </div>
         <button
           className="btn btn-success gap-2 text-primary-content"
-          onClick={() => setIsCreating(prev => !prev)}
+          onClick={() => setIsCreating((prev) => !prev)}
         >
-          <PlusIcon className="w-6 h-6"/>
+          <PlusIcon className="w-6 h-6" />
           Add Item
         </button>
       </div>
@@ -137,30 +140,32 @@ export default function Budget({ budgetItems, wedding }: Props) {
               <td>Difference</td>
               <td>Amount Paid</td>
               <td>Payment Due</td>
-              <td align="center" className="w-24">Edit</td>
+              <td align="center" className="w-24">
+                Edit
+              </td>
             </tr>
           </thead>
           <tbody>
-            {budgetItems.map(item => editingId !== item.id ? (
-              <tr key={item.id}>
-                <td>{item.name}</td>
-                <td>{`$${item.goalAmount.toFixed(2)}`}</td>
-                <td>{`$${item.actualAmount?.toFixed(2) ?? "-"}`}</td>
-                <td>{getDifference(item.goalAmount, item.actualAmount)}</td>
-                <td>{`$${item.actualPaid?.toFixed(2) ?? "-"}`}</td>
-                <td>{item.dueDate}</td>
-                <td align="center">
-                  <button className="btn btn-sm" onClick={onEditClick(item.id)} type="button">
-                    Edit
-                  </button>
-                </td>
-              </tr>
-            ): (
-              <BudgetForm budget={item} onFormDoneClick={onFormDoneClick} />
-            ))}
-            {isCreating &&
-              <BudgetForm onFormDoneClick={onFormDoneClick} />
-            }
+            {budgetItems.map((item) =>
+              editingId !== item.id ? (
+                <tr key={item.id}>
+                  <td>{item.name}</td>
+                  <td>{`$${item.goalAmount.toFixed(2)}`}</td>
+                  <td>{`$${item.actualAmount?.toFixed(2) ?? "-"}`}</td>
+                  <td>{getDifference(item.goalAmount, item.actualAmount)}</td>
+                  <td>{`$${item.actualPaid?.toFixed(2) ?? "-"}`}</td>
+                  <td>{item.dueDate}</td>
+                  <td align="center">
+                    <button className="btn btn-sm" onClick={onEditClick(item.id)} type="button">
+                      Edit
+                    </button>
+                  </td>
+                </tr>
+              ) : (
+                <BudgetForm budget={item} onFormDoneClick={onFormDoneClick} />
+              )
+            )}
+            {isCreating && <BudgetForm onFormDoneClick={onFormDoneClick} />}
           </tbody>
         </table>
       </div>

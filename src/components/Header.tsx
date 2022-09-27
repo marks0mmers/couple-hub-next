@@ -34,18 +34,23 @@ const Header = () => {
         <select
           data-choose-theme={true}
           className="select select-sm select-bordered"
-          onChange={e => setTheme(e.target.value)}
+          onChange={(e) => setTheme(e.target.value)}
         >
           <option value="light">Light</option>
           <option value="dark">Dark</option>
         </select>
-        { session?.user ? (
+        {session?.user ? (
           <div className="dropdown dropdown-end">
             <label tabIndex={0} className="btn btn-primary normal-case">
               <div id="user" className="flex gap-2">
                 <div className="avatar">
                   <div className="w-8 rounded-lg">
-                    <Image src={session?.user?.image ?? ""} alt="profile_picture" width={32} height={32}/>
+                    <Image
+                      src={session?.user?.image ?? ""}
+                      alt="profile_picture"
+                      width={32}
+                      height={32}
+                    />
                   </div>
                 </div>
                 <article className="prose flex items-center">
@@ -53,8 +58,13 @@ const Header = () => {
                 </article>
               </div>
             </label>
-            <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
-              <li onClick={() => signOut()}><p>Sign Out</p></li>
+            <ul
+              tabIndex={0}
+              className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52"
+            >
+              <li onClick={() => signOut()}>
+                <p>Sign Out</p>
+              </li>
             </ul>
           </div>
         ) : (

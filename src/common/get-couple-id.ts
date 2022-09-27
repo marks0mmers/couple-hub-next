@@ -4,9 +4,9 @@ import { authOptions } from "../pages/api/auth/[...nextauth]";
 import { prisma } from "./prisma";
 
 export const getCoupleId = async (
-  req: IncomingMessage & {cookies: Partial<{[p: string]: string}>},
-  res: ServerResponse,
-): Promise<{coupleId: string; redirect?: never} | {coupleId?: never; redirect: string}> => {
+  req: IncomingMessage & { cookies: Partial<{ [p: string]: string }> },
+  res: ServerResponse
+): Promise<{ coupleId: string; redirect?: never } | { coupleId?: never; redirect: string }> => {
   const session = await unstable_getServerSession(req, res, authOptions);
 
   if (!session) {
@@ -25,7 +25,6 @@ export const getCoupleId = async (
       },
     },
   });
-
 
   if (!coupleIdQuery) {
     return {

@@ -43,7 +43,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ req, res }
 
 type Props = {
   weddingId: string;
-}
+};
 
 export default function CreateWeddingVenue({ weddingId }: Props) {
   const [priceType, setPriceType] = useState<WeddingVenuePriceType>(WeddingVenuePriceType.FLAT_FEE);
@@ -62,11 +62,7 @@ export default function CreateWeddingVenue({ weddingId }: Props) {
           <label className="label">
             <span className="label-text">Name of Venue</span>
           </label>
-          <input
-            name="name"
-            className="input input-bordered"
-            required={true}
-          />
+          <input name="name" className="input input-bordered" required={true} />
         </div>
         <div className="form-control col-start-9 col-span-2">
           <label className="label">
@@ -87,22 +83,18 @@ export default function CreateWeddingVenue({ weddingId }: Props) {
           <div className="btn-group">
             <button
               type="button"
-              className={clsx(
-                "btn",
-                "no-animation",
-                { "btn-active": priceType === WeddingVenuePriceType.FLAT_FEE },
-              )}
+              className={clsx("btn", "no-animation", {
+                "btn-active": priceType === WeddingVenuePriceType.FLAT_FEE,
+              })}
               onClick={() => setPriceType(WeddingVenuePriceType.FLAT_FEE)}
             >
               Flat Fee
             </button>
             <button
               type="button"
-              className={clsx(
-                "btn",
-                "no-animation",
-                { "btn-active": priceType === WeddingVenuePriceType.PER_HOUR },
-              )}
+              className={clsx("btn", "no-animation", {
+                "btn-active": priceType === WeddingVenuePriceType.PER_HOUR,
+              })}
               onClick={() => setPriceType(WeddingVenuePriceType.PER_HOUR)}
             >
               Per Hour
@@ -124,14 +116,10 @@ export default function CreateWeddingVenue({ weddingId }: Props) {
           </div>
         </div>
         <div
-          className={clsx(
-            "form-control",
-            "col-start-5",
-            {
-              "col-span-2": priceType === WeddingVenuePriceType.PER_HOUR,
-              "col-span-6": priceType === WeddingVenuePriceType.FLAT_FEE,
-            },
-          )}
+          className={clsx("form-control", "col-start-5", {
+            "col-span-2": priceType === WeddingVenuePriceType.PER_HOUR,
+            "col-span-6": priceType === WeddingVenuePriceType.FLAT_FEE,
+          })}
         >
           <label className="label">
             <span className="label-text">Price</span>
@@ -147,7 +135,7 @@ export default function CreateWeddingVenue({ weddingId }: Props) {
             />
           </label>
         </div>
-        {priceType === WeddingVenuePriceType.PER_HOUR &&
+        {priceType === WeddingVenuePriceType.PER_HOUR && (
           <>
             <div className="form-control col-start-7 col-span-2">
               <label className="label">
@@ -172,52 +160,39 @@ export default function CreateWeddingVenue({ weddingId }: Props) {
               />
             </div>
           </>
-        }
+        )}
         <div className="form-control col-start-3 col-span-4">
           <label className="label">
             <span className="label-text">Street Name</span>
           </label>
-          <input
-            name="street"
-            className="input input-bordered"
-            required={true}
-          />
+          <input name="street" className="input input-bordered" required={true} />
         </div>
         <div className="form-control col-start-7 col-span-2">
           <label className="label">
             <span className="label-text">City</span>
           </label>
-          <input
-            name="city"
-            className="input input-bordered"
-            required={true}
-          />
+          <input name="city" className="input input-bordered" required={true} />
         </div>
         <div className="form-control col-start-9 col-span-1">
           <label className="label">
             <span className="label-text">State</span>
           </label>
-          <select
-            name="state"
-            className="input input-bordered"
-            required={true}
-          >
+          <select name="state" className="input input-bordered" required={true}>
             <option></option>
-            {STATES.map(state => <option key={state} value={state}>{state}</option>)}
+            {STATES.map((state) => (
+              <option key={state} value={state}>
+                {state}
+              </option>
+            ))}
           </select>
         </div>
         <div className="form-control col-start-10 col-span-1">
           <label className="label">
             <span className="label-text">Zip</span>
           </label>
-          <input
-            name="zipCode"
-            className="input input-bordered"
-            type="number"
-            required={true}
-          />
+          <input name="zipCode" className="input input-bordered" type="number" required={true} />
         </div>
-        <div id="spacer" className="btn col-start-3 col-span-2 opacity-0"/>
+        <div id="spacer" className="btn col-start-3 col-span-2 opacity-0" />
         <Link href="/wedding/venues">
           <button className="btn col-start-3 col-span-4" type="button">
             Go Back
@@ -232,9 +207,5 @@ export default function CreateWeddingVenue({ weddingId }: Props) {
 }
 
 CreateWeddingVenue.getLayout = (page: ReactElement) => {
-  return (
-    <WeddingLayout>
-      {page}
-    </WeddingLayout>
-  );
+  return <WeddingLayout>{page}</WeddingLayout>;
 };

@@ -5,8 +5,8 @@ import { useRouter } from "next/router";
 import clsx from "clsx";
 
 type Props = {
-  children: ReactNode
-}
+  children: ReactNode;
+};
 
 const routes = [
   {
@@ -34,15 +34,15 @@ const Layout = ({ children }: Props) => {
 
   return (
     <nav className="drawer">
-      <input id="my-drawer" type="checkbox" className="drawer-toggle" ref={drawerToggleLink}/>
+      <input id="my-drawer" type="checkbox" className="drawer-toggle" ref={drawerToggleLink} />
       <div className="drawer-content flex flex-col">
-        <Header/>
+        <Header />
         {children}
       </div>
       <section className="drawer-side">
         <label htmlFor="my-drawer" className="drawer-overlay"></label>
         <ul className="menu p-4 overflow-y-auto w-80 bg-base-100 text-base-content">
-          {routes.map(route => (
+          {routes.map((route) => (
             <li key={route.url} className={clsx({ "bg-base-300": router.pathname === route.url })}>
               <Link href={route.url}>
                 <div onClick={() => drawerToggleLink.current?.click()}>{route.label}</div>

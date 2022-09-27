@@ -5,13 +5,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method !== "PUT") {
     res.status(405).send("Invalid Method");
   }
-  const {
-    guestId,
-    fromTierId,
-    fromOrder,
-    toTierId,
-    toOrder,
-  } = req.body;
+  const { guestId, fromTierId, fromOrder, toTierId, toOrder } = req.body;
 
   const fromTier = await prisma.weddingGuestTier.findFirst({
     where: { id: fromTierId },
@@ -28,12 +22,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (fromOrder < toOrder) {
       // Moving down
       const guestsToMove = fromTier.weddingGuests
-        .filter(guest => guest.id !== guestId && guest.order > fromOrder && guest.order <= toOrder)
-        .map(guest => [guest.id, guest.order] as const);
-      await Promise.all(guestsToMove.map(([id, order]) => prisma.weddingGuest.update({
-        where: { id },
-        data: { order: order - 1 },
-      })));
+        .filter(
+          (guest) => guest.id !== guestId && guest.order > fromOrder && guest.order <= toOrder
+        )
+        .map((guest) => [guest.id, guest.order] as const);
+      await Promise.all(
+        guestsToMove.map(([id, order]) =>
+          prisma.weddingGuest.update({
+            where: { id },
+            data: { order: order - 1 },
+          })
+        )
+      );
       const moved = await prisma.weddingGuest.update({
         where: { id: guestId },
         data: {
@@ -44,12 +44,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     } else {
       // Moving Up
       const guestsToMove = fromTier.weddingGuests
-        .filter(guest => guest.id !== guestId && guest.order >= toOrder && guest.order < fromOrder)
-        .map(guest => [guest.id, guest.order] as const);
-      await Promise.all(guestsToMove.map(([id, order]) => prisma.weddingGuest.update({
-        where: { id },
-        data: { order: order + 1 },
-      })));
+        .filter(
+          (guest) => guest.id !== guestId && guest.order >= toOrder && guest.order < fromOrder
+        )
+        .map((guest) => [guest.id, guest.order] as const);
+      await Promise.all(
+        guestsToMove.map(([id, order]) =>
+          prisma.weddingGuest.update({
+            where: { id },
+            data: { order: order + 1 },
+          })
+        )
+      );
       const moved = await prisma.weddingGuest.update({
         where: { id: guestId },
         data: {
@@ -70,22 +76,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const fromGuestsToMove = fromTier.weddingGuests
-      .filter(guest => guest.id !== guestId && guest.order > fromOrder)
-      .map(guest => [guest.id, guest.order] as const);
+      .filter((guest) => guest.id !== guestId && guest.order > fromOrder)
+      .map((guest) => [guest.id, guest.order] as const);
 
     const toGuestsToMove = toTier.weddingGuests
-      .filter(guest => guest.id !== guestId && guest.order >= toOrder)
-      .map(guest => [guest.id, guest.order] as const);
+      .filter((guest) => guest.id !== guestId && guest.order >= toOrder)
+      .map((guest) => [guest.id, guest.order] as const);
 
     await Promise.all([
-      ...fromGuestsToMove.map(([id, order]) => prisma.weddingGuest.update({
-        where: { id },
-        data: { order: order - 1 },
-      })),
-      ...toGuestsToMove.map(([id, order]) => prisma.weddingGuest.update({
-        where: { id },
-        data: { order: order + 1 },
-      })),
+      ...fromGuestsToMove.map(([id, order]) =>
+        prisma.weddingGuest.update({
+          where: { id },
+          data: { order: order - 1 },
+        })
+      ),
+      ...toGuestsToMove.map(([id, order]) =>
+        prisma.weddingGuest.update({
+          where: { id },
+          data: { order: order + 1 },
+        })
+      ),
     ]);
     const moved = await prisma.weddingGuest.update({
       where: { id: guestId },

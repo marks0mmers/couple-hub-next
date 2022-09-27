@@ -2,33 +2,44 @@ import { Draggable, Droppable } from "@hello-pangea/dnd";
 import { WeddingGuest, WeddingGuestTier } from "@prisma/client";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import { useCallback, FormEvent, useState } from "react";
-import axios from "axios";
 import clsx from "clsx";
 
 type Props = {
   tier: WeddingGuestTier & { weddingGuests: WeddingGuest[] };
-  index: number
+  index: number;
   onGuestCreated: (guest: WeddingGuest) => void;
-}
+};
 
 const GuestColumn = ({ tier, index, onGuestCreated }: Props) => {
   const [newGuestName, setNewGuestName] = useState("");
 
-  const addGuestToTier = useCallback(async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const addGuestToTier = useCallback(
+    async (e: FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
 
-    const { data: created } = await axios.post<WeddingGuest>(`/api/weddings/guestTiers/guests?tierId=${tier.id}`, {
-      name: newGuestName,
-    });
+      const url = `/api/weddings/guestTiers/guests?tierId=${tier.id}`;
 
-    onGuestCreated(created);
+      const options = {
+        method: "POST",
+        body: JSON.stringify({
+          name: newGuestName,
+        }),
+      };
 
-    setNewGuestName("");
-  }, [tier.id, newGuestName, onGuestCreated]);
+      const response = await fetch(url, options);
+
+      const created: WeddingGuest = await response.json();
+
+      onGuestCreated(created);
+
+      setNewGuestName("");
+    },
+    [tier.id, newGuestName, onGuestCreated]
+  );
 
   return (
     <Draggable draggableId={tier.id} index={index}>
-      {tierDragContext => (
+      {(tierDragContext) => (
         <div
           {...tierDragContext.draggableProps}
           {...tierDragContext.dragHandleProps}
@@ -38,11 +49,8 @@ const GuestColumn = ({ tier, index, onGuestCreated }: Props) => {
           <div className="w-full bg-base-100 rounded-t-box py-1 border-b-base-300 border-b-[1px]">
             <span className="text-2xs py-1 px-4 font-bold w-full">{tier.name}</span>
           </div>
-          <Droppable
-            droppableId={tier.id}
-            type="GUEST"
-          >
-            {tierDropContext => (
+          <Droppable droppableId={tier.id} type="GUEST">
+            {(tierDropContext) => (
               <ul
                 {...tierDropContext.droppableProps}
                 ref={tierDropContext.innerRef}
@@ -55,15 +63,10 @@ const GuestColumn = ({ tier, index, onGuestCreated }: Props) => {
                         {...dragContext.draggableProps}
                         {...dragContext.dragHandleProps}
                         ref={dragContext.innerRef}
-                        className={clsx(
-                          "bg-base-100",
-                          "border-b-base-300",
-                          "border-b-[1px]",
-                          {
-                            "border-base-300": dragSnapshot.isDragging,
-                            "border-[1px]": dragSnapshot.isDragging,
-                          }
-                        )}
+                        className={clsx("bg-base-100", "border-b-base-300", "border-b-[1px]", {
+                          "border-base-300": dragSnapshot.isDragging,
+                          "border-[1px]": dragSnapshot.isDragging,
+                        })}
                       >
                         <p className="px-4 py-1">{guest.name}</p>
                       </li>
@@ -81,7 +84,7 @@ const GuestColumn = ({ tier, index, onGuestCreated }: Props) => {
             <input
               name="name"
               value={newGuestName}
-              onChange={e => setNewGuestName(e.target.value)}
+              onChange={(e) => setNewGuestName(e.target.value)}
               className="input input-xs input-bordered rounded-md flex-1"
             />
             <button
@@ -93,7 +96,7 @@ const GuestColumn = ({ tier, index, onGuestCreated }: Props) => {
                 "border-transparent",
                 "hover:border-transparent",
                 "hover:bg-base-200",
-                "active:bg-base-300",
+                "active:bg-base-300"
               )}
             >
               <PlusIcon className="w-4 h-4 text-base-content" />
@@ -103,7 +106,6 @@ const GuestColumn = ({ tier, index, onGuestCreated }: Props) => {
       )}
     </Draggable>
   );
-
 };
 
 export default GuestColumn;

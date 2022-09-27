@@ -8,7 +8,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).send({ message: "Wedding ID is Invalid" });
   }
 
-  const rentalStart = req.body.rentalStart ? parse(req.body.rentalStart, "HH:mm", new Date()) : null;
+  const rentalStart = req.body.rentalStart
+    ? parse(req.body.rentalStart, "HH:mm", new Date())
+    : null;
   const rentalEnd = req.body.rentalEnd ? parse(req.body.rentalEnd, "HH:mm", new Date()) : null;
   console.log(rentalStart, rentalEnd);
 

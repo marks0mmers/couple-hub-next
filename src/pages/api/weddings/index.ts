@@ -25,14 +25,14 @@ const handlePut: NextApiHandler = async (req, res) => {
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   switch (req.method) {
-  case "POST":
-    await handlePost(req, res);
-    return;
-  case "PUT":
-    await handlePut(req, res);
-    return;
-  default:
-    res.status(405).send({ message: "Unsupported method" });
-    return;
+    case "POST":
+      await handlePost(req, res);
+      return;
+    case "PUT":
+      await handlePut(req, res);
+      return;
+    default:
+      res.status(405).send({ message: "Unsupported method" });
+      return;
   }
 }

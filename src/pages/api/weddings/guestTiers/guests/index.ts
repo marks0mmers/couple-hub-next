@@ -24,11 +24,11 @@ const handlePost: NextApiHandler = async (req, res) => {
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   switch (req.method) {
-  case "POST":
-    await handlePost(req, res);
-    return;
-  default:
-    res.status(405).send("Invalid request method");
-    return;
+    case "POST":
+      await handlePost(req, res);
+      return;
+    default:
+      res.status(405).send("Invalid request method");
+      return;
   }
 }
