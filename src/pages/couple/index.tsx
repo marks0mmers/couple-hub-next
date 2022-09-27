@@ -1,4 +1,4 @@
-import { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import { GetServerSideProps } from "next";
 import { User } from "@prisma/client";
 import { useSession } from "next-auth/react";
 import { Couple, CoupleType } from "@prisma/client";
@@ -12,13 +12,6 @@ import { goToSignIn } from "../../util/auth-utils";
 import { unstable_getServerSession } from "next-auth";
 import { authOptions } from "../api/auth/[...nextauth]";
 
-type Props = {
-  couple?: Omit<Couple, "relationshipStart"> & {
-    relationshipStart: string | null;
-    users: User[];
-  };
-}
-
 export const getServerSideProps: GetServerSideProps<Props> = async ({ req, res }) => {
   const session = await unstable_getServerSession(req, res, authOptions);
 
@@ -27,6 +20,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ req, res }
   }
 
   const couple = await prisma.couple.findFirst({
+    include: { users: true },
     where: {
       users: {
         some: {
@@ -34,16 +28,11 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ req, res }
         },
       },
     },
-    include: {
-      users: true,
-    },
   });
 
   if (!couple) {
     return {
-      props: {
-        couple: undefined,
-      },
+      props: { couple: null },
     };
   }
 
@@ -57,8 +46,14 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ req, res }
   };
 };
 
+type Props = {
+  couple: Omit<Couple, "relationshipStart"> & {
+    relationshipStart: string | null;
+    users: User[];
+  } | null;
+}
 
-const CouplePage = ({ couple }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+export default function CouplePage({ couple }: Props) {
   const router = useRouter();
   const { data: session } = useSession();
 
@@ -91,16 +86,13 @@ const CouplePage = ({ couple }: InferGetServerSidePropsType<typeof getServerSide
   return (
     <main id="couple-page" className="flex-1 p-4 bg-base-200">
       <Head>
-        <title>Couple Planner</title>
+        <title>Couple Management</title>
       </Head>
-      <article className="prose max-w-none mb-8 text-center">
-        <h2>Couple Management</h2>
-      </article>
       <div className="flex justify-around">
         <div className="card w-72 shadow-xl bg-base-100">
           <article className="card-body prose">
             <h3>Current User</h3>
-            <p>{currentUser?.name}<br />{currentUser?.email}</p>
+            <p>{currentUser?.name}<br/>{currentUser?.email}</p>
           </article>
         </div>
         <div id="couple-info" className="flex flex-col justify-center">
@@ -135,12 +127,10 @@ const CouplePage = ({ couple }: InferGetServerSidePropsType<typeof getServerSide
         <div className="card w-72 shadow-xl bg-base-100">
           <article className="card-body prose">
             <h3>Partner</h3>
-            <p>{otherUser?.name}<br />{otherUser?.email}</p>
+            <p>{otherUser?.name}<br/>{otherUser?.email}</p>
           </article>
         </div>
       </div>
     </main>
   );
-};
-
-export default CouplePage;
+}

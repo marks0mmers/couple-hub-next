@@ -1,26 +1,21 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextApiHandler, NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "../../../common/prisma";
-import setHours from "date-fns/setHours";
 
-const handlePost = async (req: NextApiRequest, res: NextApiResponse) => {
+const handlePost: NextApiHandler = async (req, res) => {
   const { coupleId } = req.body;
   const wedding = await prisma.wedding.create({
-    data: {
-      coupleId,
-    },
+    data: { coupleId },
   });
   res.status(201).json(wedding);
 };
 
-const handlePut = async (req: NextApiRequest, res: NextApiResponse) => {
+const handlePut: NextApiHandler = async (req, res) => {
   const [year, month, date] = req.body.weddingDate.split("-");
   const weddingDate = new Date(year, month - 1, date);
   const updated = await prisma.wedding.update({
-    where: {
-      id: req.body.id,
-    },
+    where: { id: req.body.id },
     data: {
-      weddingDate: setHours(weddingDate, 12),
+      weddingDate,
       plannedNumberOfGuests: req.body.plannedNumberOfGuests,
       plannedTotalCost: req.body.plannedTotalCost,
     },
@@ -28,7 +23,7 @@ const handlePut = async (req: NextApiRequest, res: NextApiResponse) => {
   res.status(200).json(updated);
 };
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   switch (req.method) {
   case "POST":
     await handlePost(req, res);
@@ -40,6 +35,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     res.status(405).send({ message: "Unsupported method" });
     return;
   }
-};
-
-export default handler;
+}

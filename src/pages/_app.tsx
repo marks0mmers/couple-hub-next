@@ -15,6 +15,7 @@ import { themeChange } from "theme-change";
 import Layout from "../components/Layout";
 import { NextPage } from "next";
 import Head from "next/head";
+import { ToastContainer } from "react-toastify";
 
 const ThemeContext = createContext<[string, Dispatch<SetStateAction<string>>]>(["light", x => x]);
 
@@ -22,7 +23,7 @@ export const useTheme = () => {
   return useContext(ThemeContext);
 };
 
-export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
+export type NextPageWithLayout<P = unknown, IP = P> = NextPage<P, IP> & {
   // eslint-disable-next-line no-unused-vars
   getLayout?: (page: ReactElement) => ReactNode
 }
@@ -31,7 +32,7 @@ type AppPropsWithLayout = AppProps & {
   Component: NextPageWithLayout
 }
 
-function MyApp({
+export default function MyApp({
   Component,
   pageProps: { session, ...pageProps },
 }: AppPropsWithLayout) {
@@ -53,9 +54,8 @@ function MyApp({
         <Layout>
           {getLayout(<Component {...pageProps} />)}
         </Layout>
+        <ToastContainer />
       </ThemeContext.Provider>
     </SessionProvider>
   );
 }
-
-export default MyApp;

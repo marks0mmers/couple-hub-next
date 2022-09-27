@@ -2,11 +2,23 @@ import { Bars3BottomLeftIcon } from "@heroicons/react/20/solid";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import { useTheme } from "../pages/_app";
+import { useEffect, useState } from "react";
 
 const Header = () => {
+  const [pageTitle, setPageTitle] = useState("Couple Planner");
   const [, setTheme] = useTheme();
 
   const { data: session } = useSession();
+
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const target = document.querySelector("title")!;
+    new MutationObserver((mutations) => {
+      // eslint-disable-next-line
+      const title = (mutations[0].target as any).innerText;
+      setPageTitle(title);
+    }).observe(target, { subtree: true, characterData: true, childList: true });
+  }, []);
 
   return (
     <header className="navbar bg-primary justify-between">
@@ -15,7 +27,7 @@ const Header = () => {
           <Bars3BottomLeftIcon className="h-6 w-6 text-primary-content" />
         </label>
         <article className="prose">
-          <h1 className="text-primary-content">Couple Planner</h1>
+          <h1 className="text-primary-content">{pageTitle}</h1>
         </article>
       </div>
       <div id="right" className="flex gap-4 pr-4">

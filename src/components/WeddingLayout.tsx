@@ -2,6 +2,7 @@ import Head from "next/head";
 import { ReactNode, useCallback } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import clsx from "clsx";
 
 type Props = {
   children: ReactNode;
@@ -41,18 +42,15 @@ const WeddingLayout = ({ children }: Props) => {
   }, [router]);
 
   return (
-    <main id="weddings-page" className="p-4 flex-1 bg-base-200 flex flex-col">
+    <main id="weddings-page" className="p-4 flex-1 bg-base-200 flex flex-col overflow-hidden">
       <Head>
         <title>Wedding</title>
       </Head>
-      <article className="prose max-w-none text-center mb-4">
-        <h2>Wedding</h2>
-      </article>
       <div className="tabs justify-center">
         {tabs.map(tab => (
           <div
             key={tab.label}
-            className={`tab tab-lifted w-40 ${isTabActive(tab) ? "tab-active" : ""}`}
+            className={clsx("tab", "tab-lifted", "w-40", { "tab-active": isTabActive(tab) })}
           >
             <Link href={`/wedding${tab.url}`}>
               {tab.label}

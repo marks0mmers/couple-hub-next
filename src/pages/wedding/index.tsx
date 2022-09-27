@@ -2,72 +2,53 @@ import { User, Wedding } from "@prisma/client";
 import { GetServerSideProps } from "next";
 import { prisma } from "../../common/prisma";
 import format from "date-fns/format";
-import { NextPageWithLayout } from "../_app";
 import { ChangeEvent, ReactElement, useCallback, useState } from "react";
 import WeddingLayout from "../../components/WeddingLayout";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import axios from "axios";
-import debounce from "lodash.debounce";
-import { goToSignIn } from "../../util/auth-utils";
-import { unstable_getServerSession } from "next-auth";
-import { authOptions } from "../api/auth/[...nextauth]";
+import debounce from "lodash/debounce";
+import { getCoupleId } from "../../common/get-couple-id";
+import { dateToString } from "../../util/date-utils";
 
 export const getServerSideProps: GetServerSideProps<Props> = async ({ req, res }) => {
-  const session = await unstable_getServerSession(req, res, authOptions);
+  const { coupleId, redirect } = await getCoupleId(req, res);
 
-  if (!session) {
-    return goToSignIn();
-  }
-
-  const couple = await prisma.couple.findFirst({
-    where: {
-      users: {
-        some: {
-          email: session.user?.email,
-        },
-      },
-    },
-    select: {
-      id: true,
-      users: true,
-      wedding: {
-        select: {
-          id: true,
-          weddingDate: true,
-          coupleId: true,
-          plannedNumberOfGuests: true,
-          plannedTotalCost: true,
-        },
-      },
-    },
-  });
-
-  if (!couple) {
+  if (redirect || !coupleId) {
     return {
       redirect: {
-        destination: "/couple",
+        destination: redirect ?? "",
         permanent: false,
       },
     };
   }
 
-  const { wedding } = couple;
+  const wedding = await prisma.wedding.findFirst({
+    where: { coupleId },
+    select: {
+      id: true,
+      weddingDate: true,
+      plannedTotalCost: true,
+      plannedNumberOfGuests: true,
+      coupleId: true,
+      couple: {
+        select: { users: true },
+      },
+    },
+  });
 
   if (!wedding) {
     return {
-      props: {
-        coupleId: couple.id,
-      },
+      props: { coupleId },
     };
   }
 
   return {
     props: {
-      coupleId: couple.id,
+      coupleId,
       wedding: {
         ...wedding,
-        weddingDate: wedding.weddingDate ? format(wedding.weddingDate, "yyyy-MM-dd") : null,
-        users: couple.users,
+        weddingDate: dateToString(wedding.weddingDate),
+        users: wedding.couple.users,
       },
     },
   };
@@ -81,7 +62,7 @@ type Props = {
   }
 };
 
-const WeddingPage: NextPageWithLayout<Props> = ({ coupleId, wedding: weddingProp }) => {
+export default function WeddingPage({ coupleId, wedding: weddingProp }: Props) {
   const [wedding, setWedding] = useState(weddingProp);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -134,7 +115,7 @@ const WeddingPage: NextPageWithLayout<Props> = ({ coupleId, wedding: weddingProp
           <h3 className="text-center">Click to start planning your wedding!</h3>
         </article>
         <button className="btn btn-secondary gap-2" onClick={onCreateClick}>
-          <PlusIcon className="h-6 w-6" />
+          <PlusIcon className="h-6 w-6"/>
           Create
         </button>
       </div>
@@ -187,7 +168,7 @@ const WeddingPage: NextPageWithLayout<Props> = ({ coupleId, wedding: weddingProp
       </div>
     </div>
   );
-};
+}
 
 WeddingPage.getLayout = (page: ReactElement) => {
   return (
@@ -196,5 +177,3 @@ WeddingPage.getLayout = (page: ReactElement) => {
     </WeddingLayout>
   );
 };
-
-export default WeddingPage;

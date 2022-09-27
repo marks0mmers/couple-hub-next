@@ -81,6 +81,8 @@ model Wedding {
   plannedNumberOfGuests   Int             @default(0)
   plannedTotalCost        Float           @default(0)
   venues                  WeddingVenue[]
+  guestTiers              WeddingGuestTier[]
+  budgetItems             WeddingBudgetItem[]
 }
 
 enum WeddingVenuePriceType {
@@ -102,4 +104,35 @@ model WeddingVenue {
   city        String
   state       String
   zipCode     Int
+}
+
+model WeddingGuestTier {
+  id            String    @id @default(cuid())
+  weddingId     String
+  wedding       Wedding   @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  weddingGuests WeddingGuest[]
+
+  name          String
+  order         Int
+}
+
+model WeddingGuest {
+  id                  String            @id @default(cuid())
+  weddingGuestTierId  String
+  weddingGuestTier    WeddingGuestTier  @relation(fields: [weddingGuestTierId], references: [id], onDelete: Cascade)
+
+  name                String
+  order               Int
+}
+
+model WeddingBudgetItem {
+  id            String      @id @default(cuid())
+  weddingId     String
+  wedding       Wedding     @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+
+  name          String
+  goalAmount    Float
+  actualAmount  Float?
+  actualPaid    Float?
+  dueDate       DateTime?   @db.Date
 }

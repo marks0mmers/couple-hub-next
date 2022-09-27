@@ -1,17 +1,19 @@
-import { NextPageWithLayout } from "../../_app";
 import WeddingLayout from "../../../components/WeddingLayout";
 import { WeddingVenuePriceType } from "@prisma/client";
-import { useState } from "react";
+import { ReactElement, useState } from "react";
 import { STATES } from "../../../util/constants";
 import { GetServerSideProps } from "next";
 import { unstable_getServerSession } from "next-auth";
-import { authOptions } from "../../api/auth/[...nextauth]";
 import { prisma } from "../../../common/prisma";
 import Link from "next/link";
+import { authOptions } from "../../api/auth/[...nextauth]";
+import clsx from "clsx";
 
 export const getServerSideProps: GetServerSideProps<Props> = async ({ req, res }) => {
   const session = await unstable_getServerSession(req, res, authOptions);
+
   const result = await prisma.wedding.findFirst({
+    select: { id: true },
     where: {
       couple: {
         users: {
@@ -20,9 +22,6 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ req, res }
           },
         },
       },
-    },
-    select: {
-      id: true,
     },
   });
 
@@ -46,7 +45,7 @@ type Props = {
   weddingId: string;
 }
 
-const CreateWeddingVenue: NextPageWithLayout<Props> = ({ weddingId }) => {
+export default function CreateWeddingVenue({ weddingId }: Props) {
   const [priceType, setPriceType] = useState<WeddingVenuePriceType>(WeddingVenuePriceType.FLAT_FEE);
 
   return (
@@ -88,14 +87,22 @@ const CreateWeddingVenue: NextPageWithLayout<Props> = ({ weddingId }) => {
           <div className="btn-group">
             <button
               type="button"
-              className={`btn ${priceType === WeddingVenuePriceType.FLAT_FEE ? "btn-active" : ""} no-animation`}
+              className={clsx(
+                "btn",
+                "no-animation",
+                { "btn-active": priceType === WeddingVenuePriceType.FLAT_FEE },
+              )}
               onClick={() => setPriceType(WeddingVenuePriceType.FLAT_FEE)}
             >
               Flat Fee
             </button>
             <button
               type="button"
-              className={`btn ${priceType === WeddingVenuePriceType.PER_HOUR ? "btn-active" : ""} no-animation`}
+              className={clsx(
+                "btn",
+                "no-animation",
+                { "btn-active": priceType === WeddingVenuePriceType.PER_HOUR },
+              )}
               onClick={() => setPriceType(WeddingVenuePriceType.PER_HOUR)}
             >
               Per Hour
@@ -116,7 +123,16 @@ const CreateWeddingVenue: NextPageWithLayout<Props> = ({ weddingId }) => {
             />
           </div>
         </div>
-        <div className={`form-control col-start-5 col-span-${priceType === WeddingVenuePriceType.PER_HOUR ? 2 : 6}`}>
+        <div
+          className={clsx(
+            "form-control",
+            "col-start-5",
+            {
+              "col-span-2": priceType === WeddingVenuePriceType.PER_HOUR,
+              "col-span-6": priceType === WeddingVenuePriceType.FLAT_FEE,
+            },
+          )}
+        >
           <label className="label">
             <span className="label-text">Price</span>
           </label>
@@ -131,7 +147,7 @@ const CreateWeddingVenue: NextPageWithLayout<Props> = ({ weddingId }) => {
             />
           </label>
         </div>
-        { priceType === WeddingVenuePriceType.PER_HOUR &&
+        {priceType === WeddingVenuePriceType.PER_HOUR &&
           <>
             <div className="form-control col-start-7 col-span-2">
               <label className="label">
@@ -187,7 +203,7 @@ const CreateWeddingVenue: NextPageWithLayout<Props> = ({ weddingId }) => {
             required={true}
           >
             <option></option>
-            {STATES.map(state => <option key={state} value={state}>{state}</option> )}
+            {STATES.map(state => <option key={state} value={state}>{state}</option>)}
           </select>
         </div>
         <div className="form-control col-start-10 col-span-1">
@@ -201,7 +217,7 @@ const CreateWeddingVenue: NextPageWithLayout<Props> = ({ weddingId }) => {
             required={true}
           />
         </div>
-        <div id="spacer" className="btn col-start-3 col-span-2 opacity-0" />
+        <div id="spacer" className="btn col-start-3 col-span-2 opacity-0"/>
         <Link href="/wedding/venues">
           <button className="btn col-start-3 col-span-4" type="button">
             Go Back
@@ -213,14 +229,12 @@ const CreateWeddingVenue: NextPageWithLayout<Props> = ({ weddingId }) => {
       </form>
     </div>
   );
-};
+}
 
-CreateWeddingVenue.getLayout = (page) => {
+CreateWeddingVenue.getLayout = (page: ReactElement) => {
   return (
     <WeddingLayout>
       {page}
     </WeddingLayout>
   );
 };
-
-export default CreateWeddingVenue;

@@ -1,20 +1,17 @@
-import { NextPageWithLayout, useTheme } from "../../_app";
-import { useCallback, useMemo, Suspense } from "react";
+import { useTheme } from "../../_app";
+import { useCallback, useMemo, Suspense, ReactElement } from "react";
 import WeddingLayout from "../../../components/WeddingLayout";
 import { GetServerSideProps } from "next";
-import { goToSignIn } from "../../../util/auth-utils";
 import { prisma } from "../../../common/prisma";
 import { WeddingVenue, WeddingVenuePriceType } from "@prisma/client";
-import format from "date-fns/format";
-import addMinutes from "date-fns/addMinutes";
 import parse from "date-fns/parse";
 import differenceInSeconds from "date-fns/differenceInSeconds";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import dynamic from "next/dynamic";
-import { unstable_getServerSession } from "next-auth";
-import { authOptions } from "../../api/auth/[...nextauth]";
 import type { Theme } from "@nivo/core";
 import Link from "next/link";
+import { getCoupleId } from "../../../common/get-couple-id";
+import { dateToString } from "../../../util/date-utils";
 
 const ResponsiveBar = dynamic(
   () => import("../../../util/charts/responsive-bar"),
@@ -22,42 +19,27 @@ const ResponsiveBar = dynamic(
 );
 
 export const getServerSideProps: GetServerSideProps<Props> = async ({ req, res }) => {
-  const session = await unstable_getServerSession(req, res, authOptions);
+  const { coupleId, redirect } = await getCoupleId(req, res);
 
-  if (!session) {
-    return goToSignIn();
-  }
-
-  const couple = await prisma.couple.findFirst({
-    where: {
-      users: {
-        some: {
-          email: session.user?.email,
-        },
-      },
-    },
-    select: {
-      id: true,
-      wedding: {
-        select: {
-          id: true,
-          plannedNumberOfGuests: true,
-          venues: true,
-        },
-      },
-    },
-  });
-
-  if (!couple) {
+  if (redirect) {
     return {
       redirect: {
-        destination: "/couple",
+        destination: redirect,
         permanent: false,
       },
     };
   }
 
-  if (!couple.wedding) {
+  const wedding = await prisma.wedding.findFirst({
+    where: { coupleId },
+    select: {
+      id: true,
+      plannedNumberOfGuests: true,
+      venues: true,
+    },
+  });
+
+  if (!wedding) {
     return {
       redirect: {
         destination: "/wedding",
@@ -69,17 +51,13 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ req, res }
   return {
     props: {
       wedding: {
-        id: couple.wedding.id,
-        plannedNumberOfGuests: couple.wedding.plannedNumberOfGuests,
+        id: wedding.id,
+        plannedNumberOfGuests: wedding.plannedNumberOfGuests,
       },
-      venues: couple.wedding.venues.map(venue => ({
+      venues: wedding.venues.map(venue => ({
         ...venue,
-        rentalStart: venue.rentalStart
-          ? format(addMinutes(venue.rentalStart, venue.rentalStart.getTimezoneOffset()), "hh:mm a")
-          : null,
-        rentalEnd: venue.rentalEnd
-          ? format(addMinutes(venue.rentalEnd, venue.rentalEnd.getTimezoneOffset()), "hh:mm a")
-          : null,
+        rentalStart: dateToString(venue.rentalStart),
+        rentalEnd: dateToString(venue.rentalEnd),
       })),
     },
   };
@@ -96,7 +74,7 @@ type Props = {
   }>;
 }
 
-const Venues: NextPageWithLayout<Props> = ({ wedding, venues }) => {
+export default function Venues({ wedding, venues }: Props) {
   const [themeString] = useTheme();
 
   const theme = useMemo(() => {
@@ -127,13 +105,13 @@ const Venues: NextPageWithLayout<Props> = ({ wedding, venues }) => {
 
   const getTotalPrice = useCallback(
     (
-      { price, rentalStart, rentalEnd }: { price: number, rentalStart: string | null, rentalEnd: string | null}
+      { price, rentalStart, rentalEnd }: { price: number, rentalStart: string | null, rentalEnd: string | null },
     ) =>
       (price / 60 / 60) * differenceInSeconds(
         parse(rentalEnd ?? "", "h:mm a", new Date()),
-        parse(rentalStart ?? "", "h:mm a", new Date())
+        parse(rentalStart ?? "", "h:mm a", new Date()),
       ),
-    []
+    [],
   );
 
   const priceChartData = useMemo(() => {
@@ -154,18 +132,19 @@ const Venues: NextPageWithLayout<Props> = ({ wedding, venues }) => {
   }, [venues, wedding, theme]);
 
   return (
-    <div id="venues" className="p-4 flex-1 flex flex-col gap-2">
+    <div id="venues" className="p-4 flex-1 flex flex-col">
       <div className="flex justify-between">
         <article className="prose">
           <h3>Venue Options</h3>
         </article>
         <Link href="/wedding/venues/create">
           <button className="btn btn-secondary gap-2">
-            <PlusIcon className="w-6 h-6" />
+            <PlusIcon className="w-6 h-6"/>
             Add Venue
           </button>
         </Link>
       </div>
+      <div className="divider" />
       <div className="overflow-x-auto flex-1">
         <table className="table w-full">
           <thead>
@@ -202,6 +181,7 @@ const Venues: NextPageWithLayout<Props> = ({ wedding, venues }) => {
           </tbody>
         </table>
       </div>
+      <div className="divider" />
       <div className="flex-1 flex">
         <Suspense fallback="Charts Loading...">
           <ResponsiveBar
@@ -242,14 +222,12 @@ const Venues: NextPageWithLayout<Props> = ({ wedding, venues }) => {
     </div>
 
   );
-};
+}
 
-Venues.getLayout = (page) => {
+Venues.getLayout = (page: ReactElement) => {
   return (
     <WeddingLayout>
       <>{page}</>
     </WeddingLayout>
   );
 };
-
-export default Venues;

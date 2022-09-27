@@ -3,7 +3,7 @@ import { prisma } from "../../../common/prisma";
 import parse from "date-fns/parse";
 import subMinutes from "date-fns/subMinutes";
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (typeof req.query.weddingId !== "string") {
     return res.status(400).send({ message: "Wedding ID is Invalid" });
   }
@@ -23,7 +23,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       weddingId: req.query.weddingId,
     },
   });
-  res.status(200).json(created);
-};
 
-export default handler;
+  res.status(200).json(created);
+}

@@ -1,12 +1,11 @@
-import { NextPageWithLayout } from "../_app";
 import { ReactElement } from "react";
 import WeddingLayout from "../../components/WeddingLayout";
 
-const Seating: NextPageWithLayout = () => {
+export default function Seating() {
   return (
     <>Home Page</>
   );
-};
+}
 
 Seating.getLayout = (page: ReactElement) => {
   return (
@@ -15,5 +14,3 @@ Seating.getLayout = (page: ReactElement) => {
     </WeddingLayout>
   );
 };
-
-export default Seating;
