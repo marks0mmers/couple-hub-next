@@ -80,8 +80,7 @@ async function updateWedding(body: unknown): Promise<WeddingProp> {
 export default function WeddingPage({ coupleId, wedding: weddingProp }: Props) {
   const [wedding, setWedding] = useState(weddingProp);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const updateWeddingState = useCallback((wedding: any) => {
+  const updateWeddingState = useCallback((wedding: WeddingProp) => {
     setWedding((prev) => ({
       ...prev,
       ...wedding,

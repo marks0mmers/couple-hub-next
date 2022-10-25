@@ -134,7 +134,6 @@ export default function Guests({ wedding, tiers }: Props) {
         ];
         return newModel.sort((a, b) => a.order - b.order);
       });
-      console.log(createdTier);
       setIsCreating(false);
       setNewGuestTierName("");
     }

@@ -29,6 +29,10 @@ const tabs = [
     label: "Seating",
     url: "/seating",
   },
+  {
+    label: "To-Do List",
+    url: "/todos",
+  },
 ];
 
 const WeddingLayout = ({ children }: Props) => {
