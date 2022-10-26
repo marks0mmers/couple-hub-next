@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { prisma } from "../../common/prisma";
+import { prisma } from "../../util/prisma";
 import setHours from "date-fns/setHours";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

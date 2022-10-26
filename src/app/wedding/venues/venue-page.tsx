@@ -1,8 +1,6 @@
-import { useTheme } from "../../_app";
-import { useCallback, useMemo, Suspense, ReactElement } from "react";
-import WeddingLayout from "../../../components/WeddingLayout";
-import { GetServerSideProps } from "next";
-import { prisma } from "../../../common/prisma";
+"use client";
+
+import { useCallback, useMemo, Suspense } from "react";
 import { WeddingVenue, WeddingVenuePriceType } from "@prisma/client";
 import parse from "date-fns/parse";
 import differenceInSeconds from "date-fns/differenceInSeconds";
@@ -10,57 +8,11 @@ import { PlusIcon } from "@heroicons/react/24/solid";
 import dynamic from "next/dynamic";
 import type { Theme } from "@nivo/core";
 import Link from "next/link";
-import { getCoupleId } from "../../../common/get-couple-id";
-import { dateToString } from "../../../util/date-utils";
+import { useTheme } from "../../layout";
 
 const ResponsiveBar = dynamic(() => import("../../../util/charts/responsive-bar"), {
   suspense: true,
 });
-
-export const getServerSideProps: GetServerSideProps<Props> = async ({ req, res }) => {
-  const { coupleId, redirect } = await getCoupleId(req, res);
-
-  if (redirect) {
-    return {
-      redirect: {
-        destination: redirect,
-        permanent: false,
-      },
-    };
-  }
-
-  const wedding = await prisma.wedding.findFirst({
-    where: { coupleId },
-    select: {
-      id: true,
-      plannedNumberOfGuests: true,
-      venues: true,
-    },
-  });
-
-  if (!wedding) {
-    return {
-      redirect: {
-        destination: "/wedding",
-        permanent: false,
-      },
-    };
-  }
-
-  return {
-    props: {
-      wedding: {
-        id: wedding.id,
-        plannedNumberOfGuests: wedding.plannedNumberOfGuests,
-      },
-      venues: wedding.venues.map((venue) => ({
-        ...venue,
-        rentalStart: dateToString(venue.rentalStart),
-        rentalEnd: dateToString(venue.rentalEnd),
-      })),
-    },
-  };
-};
 
 type Props = {
   wedding: {
@@ -75,7 +27,7 @@ type Props = {
   >;
 };
 
-export default function Venues({ wedding, venues }: Props) {
+export default function ClientVenuesPage({ wedding, venues }: Props) {
   const [themeString] = useTheme();
 
   const theme = useMemo(() => {
@@ -235,11 +187,3 @@ export default function Venues({ wedding, venues }: Props) {
     </div>
   );
 }
-
-Venues.getLayout = (page: ReactElement) => {
-  return (
-    <WeddingLayout>
-      <>{page}</>
-    </WeddingLayout>
-  );
-};

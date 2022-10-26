@@ -1,63 +1,11 @@
-import { ReactElement, useCallback, useEffect, useState } from "react";
-import WeddingLayout from "../../components/WeddingLayout";
+"use client";
+
+import { useCallback, useState } from "react";
 import { WeddingGuest } from "@prisma/client";
-import { GetServerSideProps } from "next";
-import { getCoupleId } from "../../common/get-couple-id";
-import { prisma } from "../../common/prisma";
-import { DragDropContext, Droppable, DropResult, resetServerContext } from "@hello-pangea/dnd";
+import { DragDropContext, Droppable, DropResult } from "@hello-pangea/dnd";
 import { ArrowLeftIcon, PlusIcon, XMarkIcon } from "@heroicons/react/24/solid";
-import GuestColumn from "../../components/wedding/guests/guest-column";
-import { reorderGuests, WeddingGuestTierWithGuests } from "../../util/guests-functions";
-
-export const getServerSideProps: GetServerSideProps<Props> = async ({ req, res }) => {
-  const { coupleId, redirect } = await getCoupleId(req, res);
-
-  if (redirect) {
-    return {
-      redirect: {
-        destination: redirect,
-        permanent: false,
-      },
-    };
-  }
-
-  const wedding = await prisma.wedding.findFirst({
-    where: { coupleId },
-    select: {
-      id: true,
-      plannedNumberOfGuests: true,
-      guestTiers: {
-        include: {
-          weddingGuests: true,
-        },
-      },
-    },
-  });
-
-  if (!wedding) {
-    return {
-      redirect: {
-        destination: "/wedding",
-        permanent: false,
-      },
-    };
-  }
-
-  resetServerContext();
-
-  return {
-    props: {
-      wedding: {
-        id: wedding.id,
-        plannedNumberOfGuests: wedding.plannedNumberOfGuests,
-      },
-      tiers: wedding.guestTiers.map((tier) => ({
-        ...tier,
-        weddingGuests: tier.weddingGuests.sort((a, b) => a.order - b.order),
-      })),
-    },
-  };
-};
+import GuestColumn from "./guest-column";
+import { reorderGuests, WeddingGuestTierWithGuests } from "../../../util/guests-functions";
 
 type Props = {
   wedding: {
@@ -67,16 +15,11 @@ type Props = {
   tiers: WeddingGuestTierWithGuests[];
 };
 
-export default function Guests({ wedding, tiers }: Props) {
+export default function ClientGuestsPage({ wedding, tiers }: Props) {
   const [isCreating, setIsCreating] = useState(false);
-  const [isBrowser, setIsBrowser] = useState(false);
   const [newGuestTierName, setNewGuestTierName] = useState("");
 
   const [visualGuestTierModel, setVisualGuestTierModel] = useState(tiers);
-
-  useEffect(() => {
-    setIsBrowser(typeof window !== "undefined");
-  }, []);
 
   const handleDragEnd = useCallback(async (result: DropResult) => {
     if (result.destination) {
@@ -156,7 +99,7 @@ export default function Guests({ wedding, tiers }: Props) {
     });
   }, []);
 
-  return isBrowser ? (
+  return (
     <DragDropContext onDragEnd={handleDragEnd}>
       <Droppable droppableId="board" type="TIER" direction="horizontal">
         {(boardDropContext) => (
@@ -220,13 +163,5 @@ export default function Guests({ wedding, tiers }: Props) {
         )}
       </Droppable>
     </DragDropContext>
-  ) : null;
-}
-
-Guests.getLayout = (page: ReactElement) => {
-  return (
-    <WeddingLayout>
-      <>{page}</>
-    </WeddingLayout>
   );
-};
+}

@@ -1,5 +1,5 @@
 import { NextApiHandler, NextApiRequest, NextApiResponse } from "next";
-import { prisma } from "../../../../../common/prisma";
+import { prisma } from "../../../../../util/prisma";
 
 const handlePost: NextApiHandler = async (req, res) => {
   const weddingGuestTierId = req.query.tierId;

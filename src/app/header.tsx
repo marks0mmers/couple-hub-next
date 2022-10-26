@@ -1,10 +1,11 @@
 import { Bars3BottomLeftIcon } from "@heroicons/react/20/solid";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
-import { useTheme } from "../pages/_app";
-import { useEffect, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
+import Link from "next/link";
+import { useTheme } from "./layout";
 
-const Header = () => {
+export default function Header() {
   const [pageTitle, setPageTitle] = useState("Couple Planner");
   const [, setTheme] = useTheme();
 
@@ -16,9 +17,13 @@ const Header = () => {
     new MutationObserver((mutations) => {
       // eslint-disable-next-line
       const title = (mutations[0].target as any).innerText;
-      setPageTitle(title);
+      startTransition(() => {
+        setPageTitle(title);
+      });
     }).observe(target, { subtree: true, characterData: true, childList: true });
   }, []);
+
+  console.log("header render");
 
   return (
     <header className="navbar bg-primary justify-between">
@@ -68,13 +73,13 @@ const Header = () => {
             </ul>
           </div>
         ) : (
-          <button className="btn btn-primary" onClick={() => signIn()}>
-            Sign In
-          </button>
+          <Link href="/auth/signin">
+            <button className="btn btn-primary" onClick={() => signIn()}>
+              Sign In
+            </button>
+          </Link>
         )}
       </div>
     </header>
   );
-};
-
-export default Header;
+}

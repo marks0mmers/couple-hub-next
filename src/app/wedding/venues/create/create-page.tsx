@@ -1,51 +1,16 @@
-import WeddingLayout from "../../../components/WeddingLayout";
+"use client";
+
 import { WeddingVenuePriceType } from "@prisma/client";
-import { ReactElement, useState } from "react";
-import { STATES } from "../../../util/constants";
-import { GetServerSideProps } from "next";
-import { unstable_getServerSession } from "next-auth";
-import { prisma } from "../../../common/prisma";
+import { useState } from "react";
+import { STATES } from "../../../../util/constants";
 import Link from "next/link";
-import { authOptions } from "../../api/auth/[...nextauth]";
 import clsx from "clsx";
-
-export const getServerSideProps: GetServerSideProps<Props> = async ({ req, res }) => {
-  const session = await unstable_getServerSession(req, res, authOptions);
-
-  const result = await prisma.wedding.findFirst({
-    select: { id: true },
-    where: {
-      couple: {
-        users: {
-          some: {
-            email: session?.user?.email,
-          },
-        },
-      },
-    },
-  });
-
-  if (!result) {
-    return {
-      redirect: {
-        destination: "/wedding",
-        permanent: false,
-      },
-    };
-  }
-
-  return {
-    props: {
-      weddingId: result.id,
-    },
-  };
-};
 
 type Props = {
   weddingId: string;
 };
 
-export default function CreateWeddingVenue({ weddingId }: Props) {
+export default function ClientCreateVenuePage({ weddingId }: Props) {
   const [priceType, setPriceType] = useState<WeddingVenuePriceType>(WeddingVenuePriceType.FLAT_FEE);
 
   return (
@@ -205,7 +170,3 @@ export default function CreateWeddingVenue({ weddingId }: Props) {
     </div>
   );
 }
-
-CreateWeddingVenue.getLayout = (page: ReactElement) => {
-  return <WeddingLayout>{page}</WeddingLayout>;
-};

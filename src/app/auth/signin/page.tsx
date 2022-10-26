@@ -1,21 +1,12 @@
-import { GetServerSideProps } from "next";
+"use client";
+
 import { getProviders, signIn } from "next-auth/react";
 import clsx from "clsx";
+import { use } from "react";
 
-export const getServerSideProps: GetServerSideProps = async () => {
-  const providers = await getProviders();
-  return {
-    props: {
-      providers,
-    },
-  };
-};
+export default function Signin() {
+  const providers = use(getProviders());
 
-type Props = {
-  providers: Awaited<ReturnType<typeof getProviders>>;
-};
-
-export default function Signin({ providers }: Props) {
   if (!providers) {
     return <>Invalid Auth Configuration</>;
   }

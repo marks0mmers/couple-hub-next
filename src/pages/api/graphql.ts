@@ -3,7 +3,7 @@ import { buildSchemaSync } from "type-graphql";
 import { resolvers } from "@generated/type-graphql";
 import { ApolloServer } from "apollo-server-micro";
 import { NextApiRequest, NextApiResponse } from "next";
-import { prisma } from "../../common/prisma";
+import { prisma } from "../../util/prisma";
 
 const apolloServer = new ApolloServer({
   schema: buildSchemaSync({ resolvers }),

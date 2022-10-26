@@ -1,57 +1,10 @@
+"use client";
+
 /* eslint-disable react/no-unknown-property */
-import { ReactElement, useCallback, useState, MouseEvent, useRef } from "react";
+import { useCallback, useState, MouseEvent, useRef } from "react";
 import { WeddingBudgetItem } from "@prisma/client";
-import WeddingLayout from "../../components/WeddingLayout";
-import { GetServerSideProps } from "next";
-import { getCoupleId } from "../../common/get-couple-id";
-import { prisma } from "../../common/prisma";
 import { PlusIcon } from "@heroicons/react/24/solid";
-import { dateToString } from "../../util/date-utils";
-import BudgetForm from "../../components/wedding/budget/budget-form";
-
-export const getServerSideProps: GetServerSideProps<Props> = async ({ req, res }) => {
-  const { coupleId, redirect } = await getCoupleId(req, res);
-
-  if (redirect) {
-    return {
-      redirect: {
-        destination: redirect,
-        permanent: false,
-      },
-    };
-  }
-
-  const wedding = await prisma.wedding.findFirst({
-    where: { coupleId },
-    select: {
-      id: true,
-      plannedTotalCost: true,
-      budgetItems: true,
-    },
-  });
-
-  if (!wedding) {
-    return {
-      redirect: {
-        destination: "/wedding",
-        permanent: false,
-      },
-    };
-  }
-
-  return {
-    props: {
-      wedding: {
-        id: wedding.id,
-        plannedTotalCost: wedding.plannedTotalCost,
-      },
-      budgetItems: wedding.budgetItems.map((item) => ({
-        ...item,
-        dueDate: dateToString(item.dueDate),
-      })),
-    },
-  };
-};
+import BudgetForm from "./budget-form";
 
 type Props = {
   budgetItems: (Omit<WeddingBudgetItem, "dueDate"> & {
@@ -63,7 +16,7 @@ type Props = {
   };
 };
 
-export default function Budget({ budgetItems, wedding }: Props) {
+export default function ClientWeddingBudgetPage({ budgetItems, wedding }: Props) {
   const formRef = useRef<HTMLFormElement>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -172,11 +125,3 @@ export default function Budget({ budgetItems, wedding }: Props) {
     </div>
   );
 }
-
-Budget.getLayout = (page: ReactElement) => {
-  return (
-    <WeddingLayout>
-      <>{page}</>
-    </WeddingLayout>
-  );
-};

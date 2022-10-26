@@ -1,67 +1,10 @@
+"use client";
+
 import { User, Wedding } from "@prisma/client";
-import { GetServerSideProps } from "next";
-import { prisma } from "../../common/prisma";
 import format from "date-fns/format";
-import { ChangeEvent, ReactElement, useCallback, useState } from "react";
-import WeddingLayout from "../../components/WeddingLayout";
+import { ChangeEvent, useCallback, useState } from "react";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import debounce from "lodash/debounce";
-import { getCoupleId } from "../../common/get-couple-id";
-import { dateToString } from "../../util/date-utils";
-
-export const getServerSideProps: GetServerSideProps<Props> = async ({ req, res }) => {
-  const { coupleId, redirect } = await getCoupleId(req, res);
-
-  if (redirect || !coupleId) {
-    return {
-      redirect: {
-        destination: redirect ?? "",
-        permanent: false,
-      },
-    };
-  }
-
-  const wedding = await prisma.wedding.findFirst({
-    where: { coupleId },
-    select: {
-      id: true,
-      weddingDate: true,
-      plannedTotalCost: true,
-      plannedNumberOfGuests: true,
-      coupleId: true,
-      couple: {
-        select: { users: true },
-      },
-    },
-  });
-
-  if (!wedding) {
-    return {
-      props: { coupleId },
-    };
-  }
-
-  return {
-    props: {
-      coupleId,
-      wedding: {
-        ...wedding,
-        weddingDate: dateToString(wedding.weddingDate),
-        users: wedding.couple.users,
-      },
-    },
-  };
-};
-
-type WeddingProp = Omit<Wedding, "weddingDate"> & {
-  weddingDate: string | null;
-  users: User[];
-};
-
-type Props = {
-  coupleId: string;
-  wedding?: WeddingProp;
-};
 
 async function updateWedding(body: unknown): Promise<WeddingProp> {
   const url = "/api/weddings";
@@ -77,7 +20,17 @@ async function updateWedding(body: unknown): Promise<WeddingProp> {
   return res.json();
 }
 
-export default function WeddingPage({ coupleId, wedding: weddingProp }: Props) {
+type WeddingProp = Omit<Wedding, "weddingDate"> & {
+  weddingDate: string | null;
+  users: User[];
+};
+
+type Props = {
+  coupleId: string;
+  wedding?: WeddingProp;
+};
+
+export default function ClientWeddingPage({ coupleId, wedding: weddingProp }: Props) {
   const [wedding, setWedding] = useState(weddingProp);
 
   const updateWeddingState = useCallback((wedding: WeddingProp) => {
@@ -203,11 +156,3 @@ export default function WeddingPage({ coupleId, wedding: weddingProp }: Props) {
     </div>
   );
 }
-
-WeddingPage.getLayout = (page: ReactElement) => {
-  return (
-    <WeddingLayout>
-      <>{page}</>
-    </WeddingLayout>
-  );
-};

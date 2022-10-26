@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { prisma } from "../../../common/prisma";
+import { prisma } from "../../../util/prisma";
 import parse from "date-fns/parse";
 import subMinutes from "date-fns/subMinutes";
 

@@ -1,8 +1,6 @@
-import { Redirect } from "next";
+import { authOptions } from "../pages/api/auth/[...nextauth]";
+import { cookies } from "next/headers";
 
-export const goToSignIn = (): { redirect: Redirect } => ({
-  redirect: {
-    destination: "/api/auth/signin",
-    permanent: false,
-  },
-});
+export function customGetSession() {
+  return authOptions.adapter?.getSessionAndUser(cookies().get("next-auth.session-token") ?? "");
+}

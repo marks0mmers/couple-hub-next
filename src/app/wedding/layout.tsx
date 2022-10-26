@@ -1,8 +1,10 @@
+"use client";
+
 import Head from "next/head";
 import { ReactNode, useCallback } from "react";
-import { useRouter } from "next/router";
 import Link from "next/link";
 import clsx from "clsx";
+import { usePathname } from "next/navigation";
 
 type Props = {
   children: ReactNode;
@@ -36,16 +38,19 @@ const tabs = [
 ];
 
 const WeddingLayout = ({ children }: Props) => {
-  const router = useRouter();
+  const pathname = usePathname();
 
   const isTabActive = useCallback(
     (tab: { label: string; url: string }) => {
-      if (tab.url === "") {
-        return router.pathname === "/wedding";
+      if (pathname) {
+        if (tab.url === "") {
+          return pathname === "/wedding";
+        }
+        return pathname.includes(`/wedding${tab.url}`);
       }
-      return router.pathname.includes(`/wedding${tab.url}`);
+      return false;
     },
-    [router]
+    [pathname]
   );
 
   return (
