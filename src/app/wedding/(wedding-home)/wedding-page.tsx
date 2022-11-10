@@ -1,10 +1,11 @@
 "use client";
 
 import { User, Wedding } from "@prisma/client";
-import format from "date-fns/format";
-import { ChangeEvent, useCallback, useState } from "react";
+import { ChangeEvent, useCallback, useEffect, useState } from "react";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import debounce from "lodash/debounce";
+import { dateToString } from "../../../util/date-utils";
+import { usePageTitle } from "../../(contexts)/page-title-context";
 
 async function updateWedding(body: unknown): Promise<WeddingProp> {
   const url = "/api/weddings";
@@ -32,12 +33,17 @@ type Props = {
 
 export default function ClientWeddingPage({ coupleId, wedding: weddingProp }: Props) {
   const [wedding, setWedding] = useState(weddingProp);
+  const [, setPageTitle] = usePageTitle();
+
+  useEffect(() => {
+    setPageTitle("Weddings");
+  }, [setPageTitle]);
 
   const updateWeddingState = useCallback((wedding: WeddingProp) => {
     setWedding((prev) => ({
       ...prev,
       ...wedding,
-      weddingDate: wedding.weddingDate ? format(new Date(wedding.weddingDate), "yyyy-MM-dd") : null,
+      weddingDate: wedding.weddingDate ? dateToString(new Date(wedding.weddingDate)) : null,
     }));
   }, []);
 
@@ -97,20 +103,15 @@ export default function ClientWeddingPage({ coupleId, wedding: weddingProp }: Pr
 
   if (!wedding) {
     return (
-      <div className="flex-1 flex flex-col justify-center items-center gap-2">
-        <article className="prose max-w-none">
-          <h3 className="text-center">Click to start planning your wedding!</h3>
-        </article>
-        <button className="btn btn-secondary gap-2" onClick={onCreateClick}>
-          <PlusIcon className="h-6 w-6" />
-          Create
-        </button>
-      </div>
+      <button className="btn btn-secondary gap-2" onClick={onCreateClick}>
+        <PlusIcon className="h-6 w-6" />
+        Create
+      </button>
     );
   }
 
   return (
-    <div className="p-4 flex gap-4">
+    <>
       <div className="form-control flex-1">
         <label className="label">
           <span className="label-text">Wedding Date</span>
@@ -153,6 +154,6 @@ export default function ClientWeddingPage({ coupleId, wedding: weddingProp }: Pr
           />
         </label>
       </div>
-    </div>
+    </>
   );
 }

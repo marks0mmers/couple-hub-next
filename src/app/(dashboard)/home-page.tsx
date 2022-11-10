@@ -2,11 +2,12 @@
 "use client";
 
 import { Wedding, WeddingBudgetItem, WeddingVenue } from "@prisma/client";
-import { WeddingGuestTierWithGuests } from "../util/guests-functions";
-import { useMemo } from "react";
+import { WeddingGuestTierWithGuests } from "../../util/guests-functions";
+import { useEffect, useMemo } from "react";
 import { differenceInDays } from "date-fns";
 import parse from "date-fns/parse";
 import { BanknotesIcon, CalendarDaysIcon, UserIcon } from "@heroicons/react/24/solid";
+import { usePageTitle } from "../(contexts)/page-title-context";
 
 type Venue = Omit<WeddingVenue, "rentalStart" | "rentalEnd"> & {
   rentalStart: string | null;
@@ -29,6 +30,12 @@ type Props = {
 };
 
 export default function ClientHomePage({ wedding }: Props) {
+  const [, setPageTitle] = usePageTitle();
+
+  useEffect(() => {
+    setPageTitle("Couple Planner");
+  }, [setPageTitle]);
+
   const daysUntilWedding = useMemo(() => {
     if (!wedding?.weddingDate) {
       return "-";

@@ -2,17 +2,21 @@
 
 import { getProviders, signIn } from "next-auth/react";
 import clsx from "clsx";
-import { use } from "react";
+import { useEffect, useState } from "react";
 
 export default function Signin() {
-  const providers = use(getProviders());
+  const [providers, setProviders] = useState<Awaited<ReturnType<typeof getProviders>> | null>(null);
+
+  useEffect(() => {
+    getProviders().then(setProviders);
+  }, []);
 
   if (!providers) {
     return <>Invalid Auth Configuration</>;
   }
 
   return (
-    <main className="h-screen grid grid-cols-3 grid-rows-3 bg-primary">
+    <main className="h-screen grid grid-cols-3 grid-rows-3 bg-primary w-full">
       <section
         className={clsx(
           "col-start-2",
@@ -36,7 +40,7 @@ export default function Signin() {
               className="btn"
               onClick={() =>
                 signIn(provider.id, {
-                  callbackUrl: provider.callbackUrl,
+                  callbackUrl: "/",
                 })
               }
             >

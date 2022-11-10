@@ -1,9 +1,10 @@
 import { prisma } from "../../../util/prisma";
-import { customGetSession } from "../../../util/auth-utils";
 import { notFound } from "next/navigation";
 import ClientGuestsPage from "./guests-page";
+import { unstable_getServerSession } from "next-auth";
+import { authOptions } from "../../../pages/api/auth/[...nextauth]";
 
-async function getWedding(email?: string) {
+async function getWedding(email?: string | null) {
   return await prisma.wedding.findFirst({
     where: { couple: { users: { some: { email } } } },
     select: {
@@ -19,10 +20,13 @@ async function getWedding(email?: string) {
 }
 
 export default async function ServerGuestPage() {
-  const session = await customGetSession();
+  const session = await unstable_getServerSession(authOptions);
   const wedding = await getWedding(session?.user?.email);
 
-  if (!wedding) return notFound();
+  if (!wedding) {
+    notFound();
+    return null;
+  }
 
   return (
     <ClientGuestsPage

@@ -1,13 +1,13 @@
 import ClientHomePage from "./home-page";
-import { prisma } from "../util/prisma";
-import { dateToString } from "../util/date-utils";
-import { customGetSession } from "../util/auth-utils";
+import { prisma } from "../../util/prisma";
+import { dateToString } from "../../util/date-utils";
+import { unstable_getServerSession } from "next-auth";
+import { authOptions } from "../../pages/api/auth/[...nextauth]";
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+async function getWedding(email?: string | null) {
+  if (!email) return null;
 
-async function getWedding(email?: string) {
-  await sleep(5000);
-  return await prisma.wedding.findFirst({
+  return await prisma.wedding.findFirstOrThrow({
     where: {
       couple: {
         users: {
@@ -28,9 +28,9 @@ async function getWedding(email?: string) {
 }
 
 export default async function ServerHomePage() {
-  const session = await customGetSession();
-  const wedding = await getWedding(session?.user.email);
-  console.log("Server Home Page");
+  const session = await unstable_getServerSession(authOptions);
+  const wedding = await getWedding(session?.user?.email);
+
   return (
     <main className="flex flex-1 h-full">
       <section className="bg-base-200 flex-1 p-4">

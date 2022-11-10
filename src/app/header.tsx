@@ -1,29 +1,17 @@
+"use client";
+
 import { Bars3BottomLeftIcon } from "@heroicons/react/20/solid";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
-import { startTransition, useEffect, useState } from "react";
 import Link from "next/link";
-import { useTheme } from "./layout";
+import { useTheme } from "./(contexts)/theme-context";
+import { usePageTitle } from "./(contexts)/page-title-context";
 
 export default function Header() {
-  const [pageTitle, setPageTitle] = useState("Couple Planner");
   const [, setTheme] = useTheme();
+  const [pageTitle] = usePageTitle();
 
   const { data: session } = useSession();
-
-  useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const target = document.querySelector("title")!;
-    new MutationObserver((mutations) => {
-      // eslint-disable-next-line
-      const title = (mutations[0].target as any).innerText;
-      startTransition(() => {
-        setPageTitle(title);
-      });
-    }).observe(target, { subtree: true, characterData: true, childList: true });
-  }, []);
-
-  console.log("header render");
 
   return (
     <header className="navbar bg-primary justify-between">

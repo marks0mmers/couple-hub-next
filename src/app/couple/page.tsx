@@ -1,9 +1,10 @@
 import ClientCouplePage from "./couple-page";
 import { prisma } from "../../util/prisma";
-import format from "date-fns/format";
-import { customGetSession } from "../../util/auth-utils";
+import { dateToString } from "../../util/date-utils";
+import { unstable_getServerSession } from "next-auth";
+import { authOptions } from "../../pages/api/auth/[...nextauth]";
 
-async function getCouple(email?: string) {
+async function getCouple(email?: string | null) {
   return await prisma.couple.findFirst({
     include: { users: true },
     where: {
@@ -17,7 +18,7 @@ async function getCouple(email?: string) {
 }
 
 export default async function ServerCouplePage() {
-  const session = await customGetSession();
+  const session = await unstable_getServerSession(authOptions);
   const couple = await getCouple(session?.user?.email);
 
   if (!couple) {
@@ -30,9 +31,7 @@ export default async function ServerCouplePage() {
         <ClientCouplePage
           couple={{
             ...couple,
-            relationshipStart: couple.relationshipStart
-              ? format(couple.relationshipStart, "yyyy-MM-dd")
-              : null,
+            relationshipStart: dateToString(couple.relationshipStart),
           }}
         />
       </div>

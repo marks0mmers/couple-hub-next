@@ -2,8 +2,9 @@
 
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
-import { ChangeEvent, useCallback, useMemo } from "react";
+import { ChangeEvent, useCallback, useEffect, useMemo } from "react";
 import { Couple, CoupleType, User } from "@prisma/client";
+import { usePageTitle } from "../(contexts)/page-title-context";
 
 type Props = {
   couple:
@@ -29,7 +30,12 @@ async function updateCouple(body: unknown) {
 
 export default function ClientCouplePage({ couple }: Props) {
   const router = useRouter();
+  const [, setPageTitle] = usePageTitle();
   const { data: session } = useSession();
+
+  useEffect(() => {
+    setPageTitle("Couple Management");
+  }, [setPageTitle]);
 
   const onRelationshipStartChange = useCallback(
     async (e: ChangeEvent<HTMLInputElement>) => {

@@ -1,18 +1,14 @@
 "use client";
 
-import { useCallback, useMemo, Suspense } from "react";
+import { useCallback, useMemo } from "react";
 import { WeddingVenue, WeddingVenuePriceType } from "@prisma/client";
 import parse from "date-fns/parse";
 import differenceInSeconds from "date-fns/differenceInSeconds";
 import { PlusIcon } from "@heroicons/react/24/solid";
-import dynamic from "next/dynamic";
 import type { Theme } from "@nivo/core";
 import Link from "next/link";
-import { useTheme } from "../../layout";
-
-const ResponsiveBar = dynamic(() => import("../../../util/charts/responsive-bar"), {
-  suspense: true,
-});
+import { useTheme } from "../../(contexts)/theme-context";
+import ResponsiveBar from "../../../util/charts/responsive-bar";
 
 type Props = {
   wedding: {
@@ -98,7 +94,7 @@ export default function ClientVenuesPage({ wedding, venues }: Props) {
   }, [venues, wedding, theme]);
 
   return (
-    <div id="venues" className="p-4 flex-1 flex flex-col">
+    <>
       <div className="flex justify-between">
         <article className="prose">
           <h3>Venue Options</h3>
@@ -149,41 +145,39 @@ export default function ClientVenuesPage({ wedding, venues }: Props) {
       </div>
       <div className="divider" />
       <div className="flex-1 flex">
-        <Suspense fallback="Charts Loading...">
-          <ResponsiveBar
-            theme={barChartTheme}
-            data={priceChartData}
-            colors={({ data }) => data.color.toString()}
-            indexBy="label"
-            keys={["price"]}
-            valueFormat={(value) => {
-              const format = Intl.NumberFormat(undefined, {
-                style: "currency",
-                currency: "usd",
-              });
-              return format.format(value);
-            }}
-            margin={{ top: 20, bottom: 20, left: 50 }}
-            enableLabel={false}
-          />
-          <ResponsiveBar
-            theme={barChartTheme}
-            data={capacityChartData}
-            colors={({ data }) => data.color.toString()}
-            indexBy="label"
-            keys={["capacity"]}
-            margin={{ top: 20, bottom: 20, left: 50 }}
-            enableLabel={false}
-            markers={[
-              {
-                axis: "y",
-                value: wedding.plannedNumberOfGuests,
-                lineStyle: { strokeDasharray: "3 3" },
-              },
-            ]}
-          />
-        </Suspense>
+        <ResponsiveBar
+          theme={barChartTheme}
+          data={priceChartData}
+          colors={({ data }) => data.color.toString()}
+          indexBy="label"
+          keys={["price"]}
+          valueFormat={(value) => {
+            const format = Intl.NumberFormat(undefined, {
+              style: "currency",
+              currency: "usd",
+            });
+            return format.format(value);
+          }}
+          margin={{ top: 20, bottom: 20, left: 50 }}
+          enableLabel={false}
+        />
+        <ResponsiveBar
+          theme={barChartTheme}
+          data={capacityChartData}
+          colors={({ data }) => data.color.toString()}
+          indexBy="label"
+          keys={["capacity"]}
+          margin={{ top: 20, bottom: 20, left: 50 }}
+          enableLabel={false}
+          markers={[
+            {
+              axis: "y",
+              value: wedding.plannedNumberOfGuests,
+              lineStyle: { strokeDasharray: "3 3" },
+            },
+          ]}
+        />
       </div>
-    </div>
+    </>
   );
 }
